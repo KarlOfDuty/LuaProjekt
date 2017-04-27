@@ -1,7 +1,10 @@
 #include<lua.hpp>
 #include<SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+
 int windowWidth = 1280;
 int windowHeight = 720;
+
 int main()
 {
 	lua_State* luaState = luaL_newstate();
@@ -14,10 +17,16 @@ int main()
 	settings.depthBits = 24;
 	settings.stencilBits = 8;
 	settings.antialiasingLevel = 2;
-	sf::Window window(sf::VideoMode(windowWidth, windowHeight), "Lua", sf::Style::Default, settings);
+	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Lua", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 	//Activate the window
 	window.setActive(true);
+
+	//Test cube
+	sf::RectangleShape test(sf::Vector2f(200,200));
+	test.setFillColor(sf::Color::White);
+	test.setOrigin(200 / 2, 200 / 2);
+	test.setPosition(windowWidth / 2, windowHeight / 2);
 
 	//Main loop
 	bool running = true;
@@ -37,8 +46,8 @@ int main()
 				running = false;
 			}
 		}
-
-		//End the current frame (internally swaps the front and back buffers)
+		window.clear();
+		window.draw(test);
 		window.display();
 	}
 	//Release resources...
