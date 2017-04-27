@@ -1,7 +1,7 @@
-#include<lua.hpp>
 #include<SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "collision.h"
+#include "LuaScript.h"
 
 int windowWidth = 1280;
 int windowHeight = 720;
@@ -13,10 +13,8 @@ void update();
 
 int main()
 {
-	lua_State* luaState = luaL_newstate();
-	luaL_openlibs(luaState);
-	luaL_dostring(luaState,"print('Hi.')");
-	lua_close(luaState);
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
 
 	//Create the window
 	sf::ContextSettings settings;
