@@ -1,13 +1,20 @@
 #include<lua.hpp>
 #include<SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include "Player.h"
 #include "collision.h"
 
 int windowWidth = 1280;
 int windowHeight = 720;
 
+sf::Clock deltaTime;
+
+std::vector<sf::CircleShape> allEnemies;
+
 sf::CircleShape test(100,4);
 sf::CircleShape test2(80,7);
+Player player;
+
 
 void update();
 
@@ -40,6 +47,9 @@ int main()
 	test2.setOrigin(200 / 2, 200 / 2);
 	test2.setPosition(800, windowHeight / 2);
 
+	allEnemies.push_back(test);
+	allEnemies.push_back(test2);
+
 	//Main loop
 	bool running = true;
 	while (running)
@@ -61,8 +71,11 @@ int main()
 
 		update();
 		window.clear();
-		window.draw(test);
-		window.draw(test2);
+		for (int i = 0; i < allEnemies.size(); i++)
+		{
+			window.draw(allEnemies[i]);
+		}
+		window.draw(player);
 		window.display();
 	}
 	//Release resources...
@@ -72,23 +85,8 @@ int main()
 
 void update()
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		test.setPosition(test.getPosition().x-3, test.getPosition().y);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		test.setPosition(test.getPosition().x + 3, test.getPosition().y);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-	{
-		test.setPosition(test.getPosition().x, test.getPosition().y-3);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	{
-		test.setPosition(test.getPosition().x, test.getPosition().y+3);
-	}
-
+	float dt = deltaTime.restart().asSeconds();
+	player.update(dt,allEnemies);
 	sf::Vector2f mtv;
 	if (collision::collides(test, test2, mtv))
 	{
