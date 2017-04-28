@@ -18,7 +18,7 @@ void Tile::loadMap(std::string mapName)
 		std::string tileLocation;
 		openFile >> tileLocation;
 		tileTexture.loadFromFile("tiles/" + tileLocation);
-		tiles.setTexture(tileTexture);
+		tiles.setTexture(tileTexture);  
 		while (!openFile.eof())
 		{
 			std::string str;
@@ -63,4 +63,19 @@ void Tile::update(float dt)
 void Tile::draw(sf::RenderTarget &target, sf::RenderStates states)const
 {
 	target.draw(tiles, states);
+}
+void Tile::shitDraw(sf::RenderWindow &window)
+{
+	for (int i = 0; i < loadCounter.x; i++)
+	{
+		for (int j = 0; j < loadCounter.y; j++)
+		{
+			if (map[i][j].x != -1 && map[i][j].y != -1)
+			{
+				tiles.setPosition(i * 32, j * 32);
+				tiles.setTextureRect(sf::IntRect(map[i][j].x * 32, map[i][j].y * 32, 32, 32));
+				window.draw(tiles);
+			}
+		}
+	}
 }

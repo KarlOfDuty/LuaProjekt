@@ -21,5 +21,7 @@ public:
 	void update(float dt);
 	void draw(sf::RenderTarget &target, sf::RenderStates states)const;
 
+	void shitDraw(sf::RenderWindow &window);
+
 };
 #endif // !TILE_H

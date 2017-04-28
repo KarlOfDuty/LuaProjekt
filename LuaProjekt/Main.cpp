@@ -67,7 +67,8 @@ int main()
 		window.clear();
 		window.draw(test);
 		window.draw(test2);
-		window.draw(mapTile);
+		mapTile.shitDraw(window);
+		//window.draw(mapTile);
 		window.display();
 	}
 	//Release resources...
@@ -101,5 +102,5 @@ void update()
 		test.setPosition(test.getPosition() + mtv);
 	}
 
-	mapTile.update(dt);
+	//mapTile.update(dt);
 }
