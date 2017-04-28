@@ -6,22 +6,17 @@
 #include <string>
 #include <fstream>
 
-class Tile : public sf::Drawable
+class Tile : public sf::Drawable, public sf::Transformable
 {
 private:
-	sf::Texture tileTexture;
-	sf::Sprite tiles;
-	sf::Vector2i map[100][100];
-	sf::Vector2i loadCounter = sf::Vector2i(0, 0);
-
+	sf::VertexArray m_vertices;
+	sf::Texture m_tileset;
+	std::vector<int> tiles;
 public:
 	Tile();
 	~Tile();
-	void loadMap(std::string mapName);
+	bool loadMap(const std::string& tileset, sf::Vector2u tileSize, std::string mapName, unsigned int width, unsigned int height);
 	void update(float dt);
 	void draw(sf::RenderTarget &target, sf::RenderStates states)const;
-
-	void shitDraw(sf::RenderWindow &window);
-
 };
 #endif // !TILE_H
