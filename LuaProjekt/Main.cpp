@@ -1,12 +1,12 @@
-#include<lua.hpp>
 #include<SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 #include "collision.h"
+#include "LuaScript.h"
+#include "Tile.h"
 
 int windowWidth = 1280;
 int windowHeight = 720;
-
 sf::Clock deltaTime;
 
 std::vector<sf::CircleShape> allEnemies;
@@ -14,16 +14,14 @@ std::vector<sf::CircleShape> allEnemies;
 sf::CircleShape test(100,4);
 sf::CircleShape test2(80,7);
 Player player;
-
+Tile mapTile;
 
 void update();
 
 int main()
 {
-	lua_State* luaState = luaL_newstate();
-	luaL_openlibs(luaState);
-	luaL_dostring(luaState,"print('Hi.')");
-	lua_close(luaState);
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
 
 	//Create the window
 	sf::ContextSettings settings;
@@ -49,6 +47,10 @@ int main()
 
 	allEnemies.push_back(test);
 	allEnemies.push_back(test2);
+	if (!mapTile.loadMap("tiles/stone-tiles.png", sf::Vector2u(32, 32), "map", 16, 8))
+		return -1;
+
+	mapTile.scale(2, 2);
 
 	//Main loop
 	bool running = true;
@@ -71,6 +73,7 @@ int main()
 
 		update();
 		window.clear();
+		window.draw(mapTile);
 		for (int i = 0; i < allEnemies.size(); i++)
 		{
 			window.draw(allEnemies[i]);
