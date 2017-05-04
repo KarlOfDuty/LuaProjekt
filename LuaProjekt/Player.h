@@ -8,7 +8,8 @@ class Player : public sf::Drawable
 private:
 	sf::CircleShape playerShape;
 	
-	sf::CircleShape attackBox;
+	sf::RectangleShape attackBox;
+	float attackBoxRotation;
 
 	sf::Clock attackTimer;
 
@@ -16,6 +17,9 @@ private:
 
 	bool attacking;
 	int hp;
+
+	std::vector<sf::RectangleShape> debugPoints;
+
 public:
 	Player();
 	~Player();

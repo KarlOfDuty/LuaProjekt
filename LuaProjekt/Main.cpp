@@ -38,13 +38,13 @@ int main()
 	//Test cube
 	test.rotate(45);
 	test.setFillColor(sf::Color::White);
-	test.setOrigin(200 / 2, 200 / 2);
-	test.setPosition(500, windowHeight / 2);
+	test.setOrigin(test.getRadius(), test.getRadius());
+	test.setPosition(700, 200);
 	
 	//test cube2
 	test2.rotate(45);
 	test2.setFillColor(sf::Color::White);
-	test2.setOrigin(200 / 2, 200 / 2);
+	test2.setOrigin(test2.getRadius(), test2.getRadius());
 	test2.setPosition(800, windowHeight / 2);
 
 	allEnemies.push_back(test);
@@ -87,9 +87,4 @@ void update()
 {
 	float dt = deltaTime.restart().asSeconds();
 	player.update(dt,allEnemies);
-	sf::Vector2f mtv;
-	if (collision::collides(test, test2, mtv))
-	{
-		test.setPosition(test.getPosition() + mtv);
-	}
 }
