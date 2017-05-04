@@ -2,12 +2,16 @@
 #include <SFML/Graphics.hpp>
 #include "collision.h"
 #include "LuaScript.h"
+#include "Tile.h"
 
 int windowWidth = 1280;
 int windowHeight = 720;
+sf::Clock deltaTime;
 
 sf::CircleShape test(100,4);
 sf::CircleShape test2(80,7);
+Tile mapTile;
+
 
 void update();
 
@@ -38,6 +42,23 @@ int main()
 	test2.setOrigin(200 / 2, 200 / 2);
 	test2.setPosition(800, windowHeight / 2);
 
+
+	// define the level with an array of tile indices
+	const int level[] =
+	{
+		0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+		1, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3,
+		0, 1, 0, 0, 2, 0, 3, 3, 3, 0, 1, 1, 1, 0, 0, 0,
+		0, 1, 1, 0, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 0, 0,
+		0, 0, 1, 0, 3, 0, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0,
+		2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
+		0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1,
+	};
+
+	if (!mapTile.loadMap("tiles/stone-tiles.png", sf::Vector2u(32, 32), level, 16, 8))
+		return -1;
+
 	//Main loop
 	bool running = true;
 	while (running)
@@ -61,6 +82,7 @@ int main()
 		window.clear();
 		window.draw(test);
 		window.draw(test2);
+		window.draw(mapTile);
 		window.display();
 	}
 	//Release resources...
@@ -70,6 +92,7 @@ int main()
 
 void update()
 {
+	float dt = deltaTime.restart().asSeconds();
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
 		test.setPosition(test.getPosition().x-3, test.getPosition().y);
@@ -92,4 +115,5 @@ void update()
 	{
 		test.setPosition(test.getPosition() + mtv);
 	}
+
 }
