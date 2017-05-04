@@ -13,25 +13,24 @@ Tile::~Tile()
 bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::string mapName, unsigned int width, unsigned int height)
 {
 
-	std::ifstream openFile("tiles/" + mapName + ".txt");
-	if (openFile.is_open())
+	std::ifstream openFile;
+	openFile.open("tiles/" + mapName + ".txt");
+	int num;
+	while (openFile >> num)
 	{
-
-	// load the tileset texture
-	if (!m_tileset.loadFromFile(tileset))
-		return false;
-
-	// resize the vertex array to fit the level size
-	m_vertices.setPrimitiveType(sf::Quads);
-	m_vertices.resize(width * height * 4);
-
-	// populate the vertex array, with one quad per tile
-	while (!openFile.eof())
-	{
-		int level = 0;
-		openFile >> level;
-		tiles.push_back(level);
+		tiles.push_back(num);
 	}
+	openFile.close();
+
+		// load the tileset texture
+		if (!m_tileset.loadFromFile(tileset))
+			return false;
+
+		// resize the vertex array to fit the level size
+		m_vertices.setPrimitiveType(sf::Quads);
+		m_vertices.resize(width * height * 4);
+
+		// populate the vertex array, with one quad per tile
 		for (unsigned int i = 0; i < width; ++i)
 		{
 			for (unsigned int j = 0; j < height; ++j)
@@ -61,38 +60,6 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 		}
 
 	return true;
-
-	std::ifstream openFile("tiles/" + mapName + ".txt");
-	if (openFile.is_open())
-	{
-		std::string tileLocation;
-		openFile >> tileLocation;
-		tileTexture.loadFromFile("tiles/" + tileLocation);
-		tiles.setTexture(tileTexture);  
-		while (!openFile.eof())
-		{
-			std::string str;
-			openFile >> str;
-			char x = str[0], y = str[2];
-			if (!isdigit(x) || !isdigit(y))
-			{
-				map[loadCounter.x][loadCounter.y] = sf::Vector2i(-1, -1);
-			}
-			else
-			{
-				map[loadCounter.x][loadCounter.y] = sf::Vector2i(x - '0', y - '0'); //ASCII values
-			}
-			if(openFile.peek() == '\n')
-			{
-				loadCounter.x = 0;
-				loadCounter.y++;
-			}
-			else
-			{
-				loadCounter.x++;
-			}
-		}
-	}
 }
 
 void Tile::update(float dt)
@@ -102,6 +69,7 @@ void Tile::update(float dt)
 
 void Tile::draw(sf::RenderTarget &target, sf::RenderStates states)const
 {
+
 	// apply the transform
 	states.transform *= getTransform();
 
