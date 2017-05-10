@@ -21,6 +21,14 @@ Player::~Player()
 {
 
 }
+sf::CircleShape Player::getShape()
+{
+	return playerShape;
+}
+void Player::setPos(sf::Vector2f newPos)
+{
+	this->playerShape.setPosition(newPos);
+}
 void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
 	if (!attacking)
@@ -110,10 +118,20 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 	}
 	//Player collision with static objects
+	std::vector<StaticObject*> closeObjects;
 	for (int i = 0; i < allStaticObjects.size(); i++)
 	{
+		sf::Vector2f distanceVector = playerShape.getPosition() - allStaticObjects[i]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 110)
+		{
+			closeObjects.push_back(allStaticObjects[i]);
+		}
+	}
+	for (int i = 0; i < closeObjects.size(); i++)
+	{
 		sf::Vector2f mtv;
-		if (collision::collides(allStaticObjects[i]->getShape(), playerShape, mtv))
+		if (collision::collides(closeObjects[i]->getShape(), playerShape, mtv))
 		{
 			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}

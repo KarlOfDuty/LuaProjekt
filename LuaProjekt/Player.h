@@ -21,6 +21,8 @@ private:
 public:
 	Player();
 	~Player();
+	sf::CircleShape getShape();
+	void setPos(sf::Vector2f newPos);
 	void update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
