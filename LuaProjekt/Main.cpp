@@ -5,12 +5,14 @@
 #include "LuaScript.h"
 #include "Tile.h"
 #include "Enemy.h"
+#include "StaticObject.h"
 
 int windowWidth = 1280;
 int windowHeight = 960;
 sf::Clock deltaTime;
 
 std::vector<Enemy*> allEnemies;
+std::vector<StaticObject*> allStaticObjects;
 
 Player player;
 Tile mapTile;
@@ -33,6 +35,7 @@ int main()
 	window.setActive(true);
 
 	allEnemies.push_back(new Enemy(50, 3, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
+	allStaticObjects.push_back(new StaticObject(sf::Vector2f(100,100), sf::Vector2f(500,500)));
 
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;
@@ -65,6 +68,10 @@ int main()
 		{
 			window.draw(*allEnemies[i]);
 		}
+		for (int i = 0; i < allEnemies.size(); i++)
+		{
+			window.draw(*allStaticObjects[i]);
+		}
 		window.draw(player);
 		window.display();
 	}
@@ -75,5 +82,10 @@ int main()
 void update()
 {
 	float dt = deltaTime.restart().asSeconds();
-	player.update(dt,allEnemies);
+	player.update(dt,allEnemies, allStaticObjects);
+
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		allEnemies[i]->update(dt,allStaticObjects);
+	}
 }
