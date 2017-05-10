@@ -40,11 +40,36 @@ void Enemy::applyDamage(int damageTaken)
 		alive = false;
 	}
 }
-void Enemy::update(float dt)
+void Enemy::update(float dt, std::vector<StaticObject*> &allStaticObjects)
 {
 	if (alive)
 	{
-
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			shape.setPosition(shape.getPosition().x - 300 * dt, shape.getPosition().y);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			shape.setPosition(shape.getPosition().x + 300 * dt, shape.getPosition().y);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			shape.setPosition(shape.getPosition().x, shape.getPosition().y - 300 * dt);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			shape.setPosition(shape.getPosition().x, shape.getPosition().y + 300 * dt);
+		}
+		
+		//Collision with static objects
+		for (int i = 0; i < allStaticObjects.size(); i++)
+		{
+			sf::Vector2f mtv;
+			if (collision::collides(allStaticObjects[i]->getShape(), shape, mtv))
+			{
+				shape.setPosition(shape.getPosition() - mtv);
+			}
+		}
 	}
 }
 void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const

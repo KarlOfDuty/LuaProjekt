@@ -2,6 +2,8 @@
 #define ENEMY_H
 
 #include <SFML\Graphics.hpp>
+#include "StaticObject.h"
+#include "Collision.h"
 
 class Enemy : public :: sf::Drawable
 {
@@ -19,7 +21,7 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void update(float dt);
+	void update(float dt, std::vector<StaticObject*> &allStaticObjects);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 

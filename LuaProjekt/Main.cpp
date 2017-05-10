@@ -83,4 +83,9 @@ void update()
 {
 	float dt = deltaTime.restart().asSeconds();
 	player.update(dt,allEnemies, allStaticObjects);
+
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		allEnemies[i]->update(dt,allStaticObjects);
+	}
 }

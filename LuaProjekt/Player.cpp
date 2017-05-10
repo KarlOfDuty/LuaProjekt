@@ -113,12 +113,9 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 	for (int i = 0; i < allStaticObjects.size(); i++)
 	{
 		sf::Vector2f mtv;
-		if (allEnemies[i]->isAlive())
+		if (collision::collides(allStaticObjects[i]->getShape(), playerShape, mtv))
 		{
-			if (collision::collides(allStaticObjects[i]->getShape(), playerShape, mtv))
-			{
-				playerShape.setPosition(playerShape.getPosition() - mtv);
-			}
+			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}
 	}
 }
