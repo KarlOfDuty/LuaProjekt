@@ -1,12 +1,13 @@
 #include "Enemy.h"
 #include <iostream>
 
-Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Vector2f pos)
+Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos)
 {
 	this->shape = sf::CircleShape(radius, amountOfCorners);
 	this->shape.setOrigin(radius, radius);
 	this->shape.rotate(45);
 	this->shape.setPosition(pos);
+	this->shape.setFillColor(color);
 	this->health = health;
 	this->damage = damage;
 	this->alive = true;

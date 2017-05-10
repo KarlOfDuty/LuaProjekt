@@ -1,13 +1,13 @@
 #include "Player.h"
 Player::Player()
 {
-	playerShape = sf::CircleShape(100, 4);
+	playerShape = sf::CircleShape(50, 4);
 	playerShape.rotate(45);
 	playerShape.setFillColor(sf::Color::Green);
 	playerShape.setOrigin(playerShape.getRadius(), playerShape.getRadius());
 	playerShape.setPosition(500, 200);
 
-	attackBox = sf::RectangleShape(sf::Vector2f(20,150));
+	attackBox = sf::RectangleShape(sf::Vector2f(20,100));
 	attackBox.rotate(-45);
 	attackBox.setFillColor(sf::Color(50,50,200));
 	attackBox.setOrigin(10, 0);
@@ -95,7 +95,7 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies)
 	}
 
 	//Update Attackbox position
-	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(70 * direction.x, 70 * direction.y));
+	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(35 * direction.x, 35 * direction.y));
 	
 	//Player collision with enemies
 	for (int i = 0; i < allEnemies.size(); i++)

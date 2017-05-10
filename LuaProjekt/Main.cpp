@@ -7,7 +7,7 @@
 #include "Enemy.h"
 
 int windowWidth = 1280;
-int windowHeight = 720;
+int windowHeight = 960;
 sf::Clock deltaTime;
 
 std::vector<Enemy*> allEnemies;
@@ -32,12 +32,12 @@ int main()
 	//Activate the window
 	window.setActive(true);
 
-	allEnemies.push_back(new Enemy(100, 4, 20, 2, sf::Vector2f(300,300)));
+	allEnemies.push_back(new Enemy(50, 3, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
 
-	if (!mapTile.loadMap("tiles/stone-tiles.png", sf::Vector2u(32, 32), "map", 16, 8))
+	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;
 
-	mapTile.scale(2, 2);
+	mapTile.scale(1, 1);
 
 	//Main loop
 	bool running = true;
