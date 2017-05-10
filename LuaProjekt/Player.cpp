@@ -21,7 +21,7 @@ Player::~Player()
 {
 
 }
-void Player::update(float dt, std::vector<Enemy*> &allEnemies)
+void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
 	if (!attacking)
 	{
@@ -105,7 +105,19 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies)
 		{
 			if (collision::collides(playerShape, allEnemies[i]->getShape(), mtv))
 			{
-				playerShape.setPosition(playerShape.getPosition() + mtv);
+				//playerShape.setPosition(playerShape.getPosition() + mtv);
+			}
+		}
+	}
+	//Player collision with static objects
+	for (int i = 0; i < allStaticObjects.size(); i++)
+	{
+		sf::Vector2f mtv;
+		if (allEnemies[i]->isAlive())
+		{
+			if (collision::collides(allStaticObjects[i]->getShape(), playerShape, mtv))
+			{
+				playerShape.setPosition(playerShape.getPosition() - mtv);
 			}
 		}
 	}
