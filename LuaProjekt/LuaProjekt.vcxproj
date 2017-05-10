@@ -130,12 +130,14 @@
     <ClCompile Include="LuaScript.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="StaticObject.cpp" />
     <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="StaticObject.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="LuaScript.h" />
   </ItemGroup>

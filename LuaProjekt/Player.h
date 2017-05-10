@@ -4,6 +4,8 @@
 #include <iostream>
 #include "Collision.h"
 #include "Enemy.h"
+#include "StaticObject.h"
+
 class Player : public sf::Drawable
 {
 private:
@@ -19,7 +21,7 @@ private:
 public:
 	Player();
 	~Player();
-	void update(float dt, std::vector<Enemy*> &allEnemies);
+	void update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 
