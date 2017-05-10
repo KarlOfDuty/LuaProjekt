@@ -1,17 +1,19 @@
 #include<SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include "Player.h"
 #include "collision.h"
 #include "LuaScript.h"
 #include "Tile.h"
+#include "Enemy.h"
 
 int windowWidth = 1280;
 int windowHeight = 720;
 sf::Clock deltaTime;
 
-sf::CircleShape test(100,4);
-sf::CircleShape test2(80,7);
-Tile mapTile;
+std::vector<Enemy*> allEnemies;
 
+Player player;
+Tile mapTile;
 
 void update();
 
@@ -30,17 +32,7 @@ int main()
 	//Activate the window
 	window.setActive(true);
 
-	//Test cube
-	test.rotate(45);
-	test.setFillColor(sf::Color::White);
-	test.setOrigin(200 / 2, 200 / 2);
-	test.setPosition(500, windowHeight / 2);
-	
-	//test cube2
-	test2.rotate(45);
-	test2.setFillColor(sf::Color::White);
-	test2.setOrigin(200 / 2, 200 / 2);
-	test2.setPosition(800, windowHeight / 2);
+	allEnemies.push_back(new Enemy(100, 4, 20, 2, sf::Vector2f(300,300)));
 
 	if (!mapTile.loadMap("tiles/stone-tiles.png", sf::Vector2u(32, 32), "map", 16, 8))
 		return -1;
@@ -69,39 +61,19 @@ int main()
 		update();
 		window.clear();
 		window.draw(mapTile);
-		window.draw(test);
-		window.draw(test2);
+		for (int i = 0; i < allEnemies.size(); i++)
+		{
+			window.draw(*allEnemies[i]);
+		}
+		window.draw(player);
 		window.display();
 	}
 	//Release resources...
 	return 0;
-
 }
 
 void update()
 {
 	float dt = deltaTime.restart().asSeconds();
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-	{
-		test.setPosition(test.getPosition().x-3, test.getPosition().y);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-	{
-		test.setPosition(test.getPosition().x + 3, test.getPosition().y);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-	{
-		test.setPosition(test.getPosition().x, test.getPosition().y-3);
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-	{
-		test.setPosition(test.getPosition().x, test.getPosition().y+3);
-	}
-
-	sf::Vector2f mtv;
-	if (collision::collides(test, test2, mtv))
-	{
-		test.setPosition(test.getPosition() + mtv);
-	}
-
+	player.update(dt,allEnemies);
 }

@@ -1,30 +1,12 @@
 #include "collision.h"
-
+#include <iostream>
 double PI = 3.1415926535897;
 
 bool collision::collides(sf::CircleShape shape1, sf::CircleShape shape2, sf::Vector2f &mtv)
 {
-	std::vector<sf::Vector2f> points1;
-	float rotationShape1 = shape1.getRotation() * PI / 180;
-	sf::Vector2f centerShape1 = shape1.getOrigin() + shape1.getPosition();
-	for (int i = 0; i < shape1.getPointCount(); i++)
-	{
-		sf::Vector2f point(shape1.getPoint(i) + shape1.getPosition());
-		float x = centerShape1.x + (point.x - centerShape1.x) * cos(rotationShape1) - (point.y - centerShape1.y) * sin(rotationShape1);
-		float y = centerShape1.y + (point.x - centerShape1.x) * sin(rotationShape1) + (point.y - centerShape1.y) * cos(rotationShape1);
-		points1.push_back(sf::Vector2f(x, y));
-	}
+	std::vector<sf::Vector2f> points1 = getPoints(shape1);
 
-	std::vector<sf::Vector2f> points2;
-	float rotationShape2 = shape2.getRotation() * PI / 180;
-	sf::Vector2f centerShape2 = shape2.getOrigin() + shape2.getPosition();
-	for (int i = 0; i < shape2.getPointCount(); i++)
-	{
-		sf::Vector2f point(shape2.getPoint(i) + shape2.getPosition());
-		float x = centerShape2.x + (point.x - centerShape2.x) * cos(rotationShape2) - (point.y - centerShape2.y) * sin(rotationShape2);
-		float y = centerShape2.y + (point.x - centerShape2.x) * sin(rotationShape2) + (point.y - centerShape2.y) * cos(rotationShape2);
-		points2.push_back(sf::Vector2f(x, y));
-	}
+	std::vector<sf::Vector2f> points2 = getPoints(shape2);
 
 	float o = 1000000000;
 	sf::Vector2f smallestAxis;
@@ -85,6 +67,103 @@ bool collision::collides(sf::CircleShape shape1, sf::CircleShape shape2, sf::Vec
 	}
 	mtv = smallestAxis*o;
 	return true;
+}
+
+bool collision::collides(sf::RectangleShape shape1, sf::CircleShape shape2, sf::Vector2f &mtv)
+{
+	std::vector<sf::Vector2f> points1 = collision::getPoints(shape1);
+
+	std::vector<sf::Vector2f> points2 = collision::getPoints(shape2);
+
+	float o = 1000000000;
+	sf::Vector2f smallestAxis;
+	std::vector<sf::Vector2f> axis1 = getAxis(points1);
+	std::vector<sf::Vector2f> axis2 = getAxis(points2);
+
+	for (size_t i = 0; i < axis1.size(); i++) {
+		sf::Vector2f thisAxis = axis1[i];
+
+		float s1min, s1max;
+		projectOnAxis(points1, thisAxis, s1min, s1max);
+		float s2min, s2max;
+		projectOnAxis(points2, thisAxis, s2min, s2max);
+
+		if (s2min > s1max || s2max < s1min) {
+			return false;
+		}
+
+		float overlap;
+		if (s1max < s2min) {
+			overlap = s1max - s2min;
+		}
+		else
+		{
+			overlap = s2max - s1min;
+		}
+		if (overlap < o)
+		{
+			o = overlap;
+			smallestAxis = thisAxis;
+		}
+	}
+	for (size_t i = 0; i < axis2.size(); i++) {
+		sf::Vector2f thisAxis = axis2[i];
+
+		float s1min, s1max;
+		projectOnAxis(points1, thisAxis, s1min, s1max);
+		float s2min, s2max;
+		projectOnAxis(points2, thisAxis, s2min, s2max);
+
+		if (s2max < s1min || s1max < s2min) {
+			return false;
+		}
+
+		float overlap;
+		if (s1max < s2min) {
+			overlap = s1max - s2min;
+		}
+		else
+		{
+			overlap = s2max - s1min;
+		}
+		if (overlap < o)
+		{
+			o = overlap;
+			smallestAxis = thisAxis;
+		}
+	}
+	mtv = smallestAxis*o;
+	return true;
+}
+
+std::vector<sf::Vector2f> collision::getPoints(sf::RectangleShape shape)
+{
+	std::vector<sf::Vector2f> points;
+	float rotationShape = shape.getRotation() * PI / 180;
+	sf::Vector2f centerShape = shape.getOrigin() + shape.getPosition();
+	for (int i = 0; i < shape.getPointCount(); i++)
+	{
+		sf::Vector2f point(shape.getPoint(i) + shape.getPosition());
+		float x = centerShape.x + (point.x - centerShape.x) * cos(rotationShape) - (point.y - centerShape.y) * sin(rotationShape);
+		float y = centerShape.y + (point.x - centerShape.x) * sin(rotationShape) + (point.y - centerShape.y) * cos(rotationShape);
+		points.push_back(sf::Vector2f(x, y));
+	}
+	return points;
+}
+
+std::vector<sf::Vector2f> collision::getPoints(sf::CircleShape shape)
+{
+	std::vector<sf::Vector2f> points;
+	float rotationShape1 = shape.getRotation() * PI / 180;
+	sf::Vector2f centerShape1 = shape.getPosition();
+	for (int i = 0; i < shape.getPointCount(); i++)
+	{
+		sf::Vector2f point(shape.getPosition() + (shape.getPoint(i)) - sf::Vector2f(shape.getRadius(), shape.getRadius()));
+		float x = centerShape1.x + (point.x - centerShape1.x) * cos(rotationShape1) - (point.y - centerShape1.y) * sin(rotationShape1);
+		float y = centerShape1.y + (point.x - centerShape1.x) * sin(rotationShape1) + (point.y - centerShape1.y) * cos(rotationShape1);
+		points.push_back(sf::Vector2f(x, y));
+	}
+	return points;
 }
 
 std::vector<sf::Vector2f> collision::getAxis(std::vector<sf::Vector2f> allPoints)
