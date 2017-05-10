@@ -9,20 +9,30 @@ Player::Player()
 
 	attackBox = sf::RectangleShape(sf::Vector2f(20,150));
 	attackBox.rotate(-45);
-	attackBox.setFillColor(sf::Color::Green);
+	attackBox.setFillColor(sf::Color(50,50,200));
 	attackBox.setOrigin(10, 0);
 	attacking = false;
 	direction = sf::Vector2f(0, 1);
+
+	stoppedAttacking = false;
 }
 
 Player::~Player()
 {
 
 }
-void Player::update(float dt, std::vector<sf::CircleShape> &allEnemies)
+void Player::update(float dt, std::vector<Enemy*> &allEnemies)
 {
 	if (!attacking)
 	{
+		if (stoppedAttacking)
+		{
+			for (int i = 0; i < allEnemies.size(); i++)
+			{
+				allEnemies[i]->setMeleeCooldown(false);
+			}
+			stoppedAttacking = false;
+		}
 		//Controls
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		{
@@ -46,7 +56,6 @@ void Player::update(float dt, std::vector<sf::CircleShape> &allEnemies)
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
-			attackTimer.restart();
 			attacking = true;
 			if (direction.x != 1)
 			{
@@ -73,11 +82,16 @@ void Player::update(float dt, std::vector<sf::CircleShape> &allEnemies)
 		for (int i = 0; i < allEnemies.size(); i++)
 		{
 			sf::Vector2f mtv;
-			if (collision::collides(attackBox, allEnemies[i], mtv))
+			if (allEnemies[i]->canTakeMeleeDamage())
 			{
-				//SWORD COLLIDES WITH ENEMY
+				if (collision::collides(attackBox, allEnemies[i]->getShape(), mtv))
+				{
+					allEnemies[i]->applyDamage(10);
+					allEnemies[i]->setMeleeCooldown(true);
+				}
 			}
 		}
+		stoppedAttacking = true;
 	}
 
 	//Update Attackbox position
@@ -87,34 +101,14 @@ void Player::update(float dt, std::vector<sf::CircleShape> &allEnemies)
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
 		sf::Vector2f mtv;
-		if (collision::collides(playerShape, allEnemies[i], mtv))
+		if (allEnemies[i]->isAlive())
 		{
-			playerShape.setPosition(playerShape.getPosition() + mtv);
+			if (collision::collides(playerShape, allEnemies[i]->getShape(), mtv))
+			{
+				playerShape.setPosition(playerShape.getPosition() + mtv);
+			}
 		}
 	}
-
-	/*if (debugPoints.empty())
-	{
-		for (int i = 0; i < playerShape.getPointCount(); i++)
-		{
-			debugPoints.push_back(sf::RectangleShape(sf::Vector2f(20, 20)));
-			debugPoints[i].setOrigin(10, 10);
-			float rotationShape1 = playerShape.getRotation() * 3.1415926535897 / 180;
-			sf::Vector2f centerShape1 = playerShape.getPosition();
-			sf::Vector2f point(playerShape.getPosition() + (playerShape.getPoint(i)) - sf::Vector2f(playerShape.getRadius(), playerShape.getRadius()));
-			float x = centerShape1.x + (point.x - centerShape1.x) * cos(rotationShape1) - (point.y - centerShape1.y) * sin(rotationShape1);
-			float y = centerShape1.y + (point.x - centerShape1.x) * sin(rotationShape1) + (point.y - centerShape1.y) * cos(rotationShape1);
-			debugPoints[i].setPosition(x, y);
-		}
-	}
-	else
-	{
-		for (int i = 0; i < playerShape.getPointCount(); i++)
-		{
-			std::vector<sf::Vector2f> points = collision::getPoints(attackBox);
-			debugPoints[i].setPosition(points[i]);
-		}
-	}*/
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
