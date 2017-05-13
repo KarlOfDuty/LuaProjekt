@@ -1,12 +1,13 @@
 #include "Enemy.h"
 #include <iostream>
 
-Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Vector2f pos)
+Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos)
 {
 	this->shape = sf::CircleShape(radius, amountOfCorners);
 	this->shape.setOrigin(radius, radius);
 	this->shape.rotate(45);
 	this->shape.setPosition(pos);
+	this->shape.setFillColor(color);
 	this->health = health;
 	this->damage = damage;
 	this->alive = true;
@@ -44,13 +45,41 @@ void Enemy::update(float dt, std::vector<StaticObject*> &allStaticObjects)
 {
 	if (alive)
 	{	
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		{
+			shape.setPosition(shape.getPosition().x - 300 * dt, shape.getPosition().y);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		{
+			shape.setPosition(shape.getPosition().x + 300 * dt, shape.getPosition().y);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		{
+			shape.setPosition(shape.getPosition().x, shape.getPosition().y - 300 * dt);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			shape.setPosition(shape.getPosition().x, shape.getPosition().y + 300 * dt);
+		}
 		//Collision with static objects
+		std::vector<StaticObject*> closeObjects;
 		for (int i = 0; i < allStaticObjects.size(); i++)
 		{
-			sf::Vector2f mtv;
-			if (collision::collides(allStaticObjects[i]->getShape(), shape, mtv))
+			sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
+			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+			if (length < 150)
 			{
-				shape.setPosition(shape.getPosition() - mtv);
+				closeObjects.push_back(allStaticObjects[i]);
+			}
+		}
+		{
+			for (int i = 0; i < closeObjects.size(); i++)
+			{
+				sf::Vector2f mtv;
+				if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
+				{
+					shape.setPosition(shape.getPosition() - mtv);
+				}
 			}
 		}
 	}

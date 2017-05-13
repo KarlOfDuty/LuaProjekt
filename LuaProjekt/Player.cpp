@@ -1,13 +1,13 @@
 #include "Player.h"
 Player::Player()
 {
-	playerShape = sf::CircleShape(100, 4);
+	playerShape = sf::CircleShape(50, 4);
 	playerShape.rotate(45);
 	playerShape.setFillColor(sf::Color::Green);
 	playerShape.setOrigin(playerShape.getRadius(), playerShape.getRadius());
 	playerShape.setPosition(500, 200);
 
-	attackBox = sf::RectangleShape(sf::Vector2f(20,150));
+	attackBox = sf::RectangleShape(sf::Vector2f(20,100));
 	attackBox.rotate(-45);
 	attackBox.setFillColor(sf::Color(50,50,200));
 	attackBox.setOrigin(10, 0);
@@ -20,6 +20,14 @@ Player::Player()
 Player::~Player()
 {
 
+}
+sf::CircleShape Player::getShape()
+{
+	return playerShape;
+}
+void Player::setPos(sf::Vector2f newPos)
+{
+	this->playerShape.setPosition(newPos);
 }
 void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
@@ -95,7 +103,7 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 	}
 
 	//Update Attackbox position
-	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(70 * direction.x, 70 * direction.y));
+	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(35 * direction.x, 35 * direction.y));
 	
 	//Player collision with enemies
 	for (int i = 0; i < allEnemies.size(); i++)
@@ -110,10 +118,20 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 	}
 	//Player collision with static objects
+	std::vector<StaticObject*> closeObjects;
 	for (int i = 0; i < allStaticObjects.size(); i++)
 	{
+		sf::Vector2f distanceVector = playerShape.getPosition() - allStaticObjects[i]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 110)
+		{
+			closeObjects.push_back(allStaticObjects[i]);
+		}
+	}
+	for (int i = 0; i < closeObjects.size(); i++)
+	{
 		sf::Vector2f mtv;
-		if (collision::collides(allStaticObjects[i]->getShape(), playerShape, mtv))
+		if (collision::collides(closeObjects[i]->getShape(), playerShape, mtv))
 		{
 			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}

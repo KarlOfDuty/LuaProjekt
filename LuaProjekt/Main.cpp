@@ -1,26 +1,30 @@
 #include<SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <thread>
 #include "Player.h"
 #include "collision.h"
 #include "LuaScript.h"
 #include "Tile.h"
 #include "Enemy.h"
 #include "StaticObject.h"
+#include <crtdbg.h>
 
 int windowWidth = 1280;
-int windowHeight = 720;
+int windowHeight = 960;
 sf::Clock deltaTime;
 
 std::vector<Enemy*> allEnemies;
-std::vector<StaticObject*> allStaticObjects;
+//std::vector<StaticObject*> allStaticObjects;
 
-Player player;
+Player* player;
 Tile mapTile;
 
 void update();
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -34,13 +38,12 @@ int main()
 	//Activate the window
 	window.setActive(true);
 
-	allEnemies.push_back(new Enemy(100, 4, 20, 2, sf::Vector2f(300,300)));
-	allStaticObjects.push_back(new StaticObject(sf::Vector2f(100,100), sf::Vector2f(500,500)));
+	player = new Player();
 
-	if (!mapTile.loadMap("tiles/stone-tiles.png", sf::Vector2u(32, 32), "map", 16, 8))
+	allEnemies.push_back(new Enemy(50, 5, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
+
+	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;
-
-	mapTile.scale(2, 2);
 
 	//Main loop
 	bool running = true;
@@ -68,24 +71,25 @@ int main()
 		{
 			window.draw(*allEnemies[i]);
 		}
-		for (int i = 0; i < allEnemies.size(); i++)
-		{
-			window.draw(*allStaticObjects[i]);
-		}
-		window.draw(player);
+		window.draw(*player);
 		window.display();
 	}
 	//Release resources...
+	delete player;
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		delete allEnemies[i];
+	}
 	return 0;
 }
 
 void update()
 {
 	float dt = deltaTime.restart().asSeconds();
-	player.update(dt,allEnemies, allStaticObjects);
-
+	player->update(dt,allEnemies, mapTile.allStaticObjects);
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
-		allEnemies[i]->update(dt,allStaticObjects);
+		allEnemies[i]->update(dt, mapTile.allStaticObjects);
 	}
+	mapTile.update(dt, player);
 }
