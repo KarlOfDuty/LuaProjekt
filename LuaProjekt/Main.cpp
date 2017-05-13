@@ -24,8 +24,9 @@ void update();
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//lua_State* L = luaL_newstate();
-	//luaL_openlibs(L);
+	
+	lua_State* L = luaL_newstate();
+	luaL_openlibs(L);
 
 	//Create the window
 	sf::ContextSettings settings;
@@ -43,8 +44,6 @@ int main()
 
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;
-
-	//mapTile.scale(1, 1);
 
 	//Main loop
 	bool running = true;
