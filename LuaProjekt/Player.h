@@ -3,8 +3,9 @@
 #include <SFML\Graphics.hpp>
 #include <iostream>
 #include "Collision.h"
-#include "Enemy.h"
 #include "StaticObject.h"
+
+class Enemy;
 
 class Player : public sf::Drawable
 {
