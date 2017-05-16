@@ -4,6 +4,9 @@
 #include <SFML\Graphics.hpp>
 #include "StaticObject.h"
 #include "Collision.h"
+#include <random>
+
+class Player;
 
 class Enemy : public :: sf::Drawable
 {
@@ -13,6 +16,11 @@ private:
 	int damage;
 	bool alive;
 	bool meleeDamage;
+	int amountOfCorners;
+	bool attack;
+	int goTo;
+	sf::Vector2f checkPoint;
+	std::random_device rd;
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
 	~Enemy();
@@ -21,7 +29,8 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void update(float dt, std::vector<StaticObject*> &allStaticObjects);
+	void AILogic(float dt, Player *player);
+	void update(float dt, std::vector<StaticObject*> &allStaticObjects, Player *player);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 

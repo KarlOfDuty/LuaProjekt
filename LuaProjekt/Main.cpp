@@ -41,7 +41,7 @@ int main()
 
 	player = new Player();
 
-	allEnemies.push_back(new Enemy(50, 5, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
+	allEnemies.push_back(new Enemy(50, 6, 20, 2, sf::Color::Red, sf::Vector2f(600,700)));
 
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;
@@ -90,7 +90,7 @@ void update()
 	player->update(dt,allEnemies, mapTile.allStaticObjects);
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
-		allEnemies[i]->update(dt, mapTile.allStaticObjects);
+		allEnemies[i]->update(dt, mapTile.allStaticObjects, player);
 	}
 	mapTile.update(dt, player);
 }
