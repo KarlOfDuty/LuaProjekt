@@ -27,7 +27,8 @@ int main()
 	
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
-
+	luaL_dofile(L,"test.lua");
+	lua_getglobal(L,"movement");
 	//Create the window
 	sf::ContextSettings settings;
 	settings.depthBits = 24;
