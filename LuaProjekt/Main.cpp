@@ -42,7 +42,7 @@ int main()
 
 	allEnemies.push_back(new Enemy(50, 5, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
 
-	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
+	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map1", 16, 12))
 		return -1;
 
 	//Main loop
