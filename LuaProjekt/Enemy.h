@@ -5,7 +5,11 @@
 #include "StaticObject.h"
 #include "Collision.h"
 #include <random>
-
+extern "C" {
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+}
 class Player;
 
 class Enemy : public :: sf::Drawable
@@ -29,8 +33,8 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void AILogic(float dt, Player *player);
-	void update(float dt, std::vector<StaticObject*> &allStaticObjects, Player *player);
+	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player);
+	void move(sf::Vector2f dir);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 

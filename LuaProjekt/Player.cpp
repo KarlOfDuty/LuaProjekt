@@ -139,8 +139,8 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 	}
 
-	std::cout << playerShape.getPosition().x << std::endl;
-	std::cout << playerShape.getPosition().y << std::endl;
+	//std::cout << playerShape.getPosition().x << std::endl;
+	//std::cout << playerShape.getPosition().y << std::endl;
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
