@@ -95,25 +95,26 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 				shape.setPosition(shape.getPosition() - mtv);
 			}
 		}
-		//Collision with static objects
-		std::vector<StaticObject*> closeObjects;
-		for (int i = 0; i < allStaticObjects.size(); i++)
-		{
-			sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
-			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-			if (length < 150)
-			{
-				closeObjects.push_back(allStaticObjects[i]);
-			}
-		}
-		for (int i = 0; i < closeObjects.size(); i++)
-		{
-			sf::Vector2f mtv;
-			if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
-			{
-				shape.setPosition(shape.getPosition() - mtv);
-			}
-		}
+		//Collision with enemies
+
+		//std::vector<Enemy*> closeEnemies;
+		//for (int i = 0; i < enemies.size(); i++)
+		//{
+		//	sf::Vector2f distanceVector = shape.getPosition() - enemies[i]->getShape().getPosition();
+		//	float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		//	if (length < 150 && length > 0.001)
+		//	{
+		//		closeEnemies.push_back(enemies[i]);
+		//	}
+		//}
+		//for (int i = 0; i < closeEnemies.size(); i++)
+		//{
+		//	sf::Vector2f mtv;
+		//	if (collision::collides(closeEnemies[i]->getShape(), shape, mtv))
+		//	{
+		//		shape.setPosition(shape.getPosition() - mtv);
+		//	}
+		//}
 	}
 }
 void Enemy::move(sf::Vector2f dir)

@@ -7,6 +7,9 @@ function normalize(vec)
 	vec["x"] = vec["x"] / l;
 	vec["y"] = vec["y"] / l;
 end
+function rangedAttack( pos, playerPos, timeSinceLastShot )
+	return 0;
+end
 function movement( pos, playerPos )
 	vector = {};
 	vector["x"] = pos["x"] - playerPos["x"];
