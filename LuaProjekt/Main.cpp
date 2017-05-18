@@ -13,7 +13,7 @@ int windowWidth = 1280;
 int windowHeight = 960;
 sf::Clock deltaTime;
 
-std::vector<Enemy*> allEnemies;
+//std::vector<Enemy*> allEnemies;
 //std::vector<StaticObject*> allStaticObjects;
 
 Player* player;
@@ -40,8 +40,6 @@ int main()
 
 	player = new Player();
 
-	allEnemies.push_back(new Enemy(50, 5, 20, 2, sf::Color::Red, sf::Vector2f(300,300)));
-
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map1", 16, 12))
 		return -1;
 
@@ -67,29 +65,17 @@ int main()
 		update();
 		window.clear();
 		window.draw(mapTile);
-		for (int i = 0; i < allEnemies.size(); i++)
-		{
-			window.draw(*allEnemies[i]);
-		}
 		window.draw(*player);
 		window.display();
 	}
 	//Release resources...
 	delete player;
-	for (int i = 0; i < allEnemies.size(); i++)
-	{
-		delete allEnemies[i];
-	}
 	return 0;
 }
 
 void update()
 {
 	float dt = deltaTime.restart().asSeconds();
-	player->update(dt,allEnemies, mapTile.allStaticObjects);
-	for (int i = 0; i < allEnemies.size(); i++)
-	{
-		allEnemies[i]->update(dt, mapTile.allStaticObjects);
-	}
+	player->update(dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
 	mapTile.update(dt, player);
 }

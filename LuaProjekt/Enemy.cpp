@@ -12,6 +12,17 @@ Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color 
 	this->damage = damage;
 	this->alive = true;
 }
+Enemy::Enemy(int nr, sf::Vector2f pos)
+{
+	this->shape = sf::CircleShape(50, nr);
+	this->shape.setOrigin(50, 50);
+	this->shape.rotate(45);
+	this->shape.setPosition(pos);
+	this->shape.setFillColor(sf::Color::Red);
+	this->health = 7*nr;
+	this->damage = nr;
+	this->alive = true;
+}
 
 Enemy::~Enemy()
 {
