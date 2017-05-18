@@ -15,7 +15,7 @@ class Tile : public sf::Drawable, public sf::Transformable
 private:
 	sf::VertexArray m_vertices;
 	sf::Texture m_tileset;
-	std::vector<int> tiles;
+	std::vector<std::string> tiles;
 	void freeMemory();
 public:
 	std::vector<StaticObject*> allStaticObjects;

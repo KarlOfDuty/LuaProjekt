@@ -45,7 +45,7 @@ void Enemy::applyDamage(int damageTaken)
 		alive = false;
 	}
 }
-void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player)
+void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
 {
 	if (alive)
 	{	
@@ -76,6 +76,25 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_pop(L, 1);
 		move(dir*dt);
 
+		//Collision with static objects
+		std::vector<StaticObject*> closeObjects;
+		for (int i = 0; i < allStaticObjects.size(); i++)
+		{
+			sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
+			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+			if (length < 150)
+			{
+				closeObjects.push_back(allStaticObjects[i]);
+			}
+		}
+		for (int i = 0; i < closeObjects.size(); i++)
+		{
+			sf::Vector2f mtv;
+			if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
+			{
+				shape.setPosition(shape.getPosition() - mtv);
+			}
+		}
 		//Collision with static objects
 		std::vector<StaticObject*> closeObjects;
 		for (int i = 0; i < allStaticObjects.size(); i++)

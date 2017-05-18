@@ -49,7 +49,7 @@ int main()
 	allEnemies.push_back(new Enemy(50, 3, 20, 2, sf::Color::Yellow, sf::Vector2f(100, 400)));
 	allEnemies.push_back(new Enemy(50, 8, 20, 2, sf::Color::Magenta, sf::Vector2f(400,300)));
 
-	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
+	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map1", 16, 12))
 		return -1;
 
 	//Main loop
@@ -100,7 +100,7 @@ void update()
 	player->update(dt,allEnemies, mapTile.allStaticObjects);
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
-		allEnemies[i]->update(L, dt, mapTile.allStaticObjects, player);
+		allEnemies[i]->update(L, dt, mapTile.allStaticObjects, player, allEnemies);
 	}
 	mapTile.update(dt, player);
 }

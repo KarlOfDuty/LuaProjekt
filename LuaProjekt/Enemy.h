@@ -33,7 +33,7 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player);
+	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	void move(sf::Vector2f dir);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
