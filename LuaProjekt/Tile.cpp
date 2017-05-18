@@ -30,7 +30,29 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 	tiles.clear();
 	std::ifstream openFile;
 	openFile.open("tiles/" + mapName + ".txt");
-	int num;
+	std::string num;
+
+	struct doorInfo
+	{
+		std::string tileName;
+		std::string mapPath;
+		std::string outPos;
+		doorInfo(){}
+	};
+	std::vector<doorInfo> allDoorInfo;
+
+	int amountOfDoors;
+	openFile >> amountOfDoors;
+
+	for (int i = 0; i < amountOfDoors; i++)
+	{
+		doorInfo door;
+		openFile >> door.tileName;
+		openFile >> door.mapPath;
+		openFile >> door.outPos;
+		allDoorInfo.push_back(door);
+	}
+
 	while (openFile >> num)
 	{
 		tiles.push_back(num);
@@ -51,7 +73,15 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 			for (unsigned int j = 0; j < height; ++j)
 			{
 				// get the current tile number
-				int tileNumber = tiles[i + j * width];
+				int tileNumber;
+				try
+				{
+					tileNumber = std::stoi(tiles[i + j * width]);
+				}
+				catch(std::invalid_argument& e)
+				{
+					tileNumber = 2;
+				}
 
 				// find its position in the tileset texture
 				int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
@@ -79,7 +109,32 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 				}
 				if (tileNumber == 2)
 				{
-					allDoors.push_back(new Door(quad[0].position,sf::Vector2f(600,400), "map2"));
+					for (int k = 0; k < allDoorInfo.size(); k++)
+					{
+						if (tiles[i + j * width] == allDoorInfo[k].tileName)
+						{
+							sf::Vector2f outPos;
+							if (allDoorInfo[k].outPos == "N")
+							{
+								outPos = sf::Vector2f(1280 / 2, 120);
+							}
+							else if (allDoorInfo[k].outPos == "S")
+							{
+								outPos = sf::Vector2f(1280 / 2, 840);
+							}
+							else if (allDoorInfo[k].outPos == "W")
+							{
+								outPos = sf::Vector2f(120, 480);
+							}
+							else
+							{
+								outPos = sf::Vector2f(1160, 480);
+							}
+
+							allDoors.push_back(new Door(quad[0].position, outPos, allDoorInfo[k].mapPath));
+							k = allDoorInfo.size();
+						}
+					}
 				}
 			}
 		}
@@ -99,8 +154,8 @@ void Tile::update(float dt, Player* player)
 			{
 				if (collision::collides(allDoors[i]->getShape(), player->getShape(), sf::Vector2f()))
 				{
-					loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), allDoors[i]->getMapName(), 16, 12);
 					player->setPos(allDoors[i]->getPlayerNewPos());
+					loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), allDoors[i]->getMapName(), 16, 12);
 					i = allDoors.size();
 				}
 			}
