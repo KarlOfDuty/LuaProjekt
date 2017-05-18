@@ -44,7 +44,10 @@ int main()
 
 	player = new Player();
 
-	allEnemies.push_back(new Enemy(50, 6, 20, 2, sf::Color::Red, sf::Vector2f(600,700)));
+	allEnemies.push_back(new Enemy(50, 6, 20, 2, sf::Color::Red, sf::Vector2f(200,700)));
+	allEnemies.push_back(new Enemy(50, 5, 20, 2, sf::Color::Blue, sf::Vector2f(600, 800)));
+	allEnemies.push_back(new Enemy(50, 3, 20, 2, sf::Color::Yellow, sf::Vector2f(100, 400)));
+	allEnemies.push_back(new Enemy(50, 8, 20, 2, sf::Color::Magenta, sf::Vector2f(400,300)));
 
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map", 16, 12))
 		return -1;

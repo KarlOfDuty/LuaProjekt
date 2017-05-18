@@ -50,8 +50,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	if (alive)
 	{	
 		lua_getglobal(L, "movement");
-		/* the first argument */
-		float test = shape.getPosition().y;
+
 		lua_newtable(L);
 		lua_pushstring(L, "x");
 		lua_pushnumber(L, shape.getPosition().x);
@@ -67,18 +66,16 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_pushstring(L, "y");
 		lua_pushnumber(L, player->getShape().getPosition().y);
 		lua_settable(L, -3);
-		/* the second argument */
 
-		/* call the function with 2 arguments, return 1 result */
 		lua_call(L, 2, 2);
 
-		/* get the result */
 		sf::Vector2f dir;
 		dir.x = (float)lua_tonumber(L, -1);
 		lua_pop(L, 1);
 		dir.y = (float)lua_tonumber(L, -1);
 		lua_pop(L, 1);
 		move(dir*dt);
+
 		//Collision with static objects
 		std::vector<StaticObject*> closeObjects;
 		for (int i = 0; i < allStaticObjects.size(); i++)
