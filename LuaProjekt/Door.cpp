@@ -3,8 +3,9 @@
 Door::Door(sf::Vector2f pos, sf::Vector2f playerNewPos, std::string mapName)
 {
 	this->shape = sf::RectangleShape(sf::Vector2f(80,80));
+	this->shape.setFillColor(sf::Color::Magenta);
 	this->shape.setPosition(pos);
-	active = true;
+	active = false;
 	this->playerNewPos = playerNewPos;
 	this->mapName = mapName;
 }
@@ -14,7 +15,7 @@ Door::~Door()
 {
 }
 
-sf::RectangleShape Door::getShape()
+sf::RectangleShape& Door::getShape()
 {
 	return shape;
 }
@@ -36,4 +37,14 @@ std::string Door::getMapName()
 bool Door::isActive()
 {
 	return active;
+}
+
+void Door::setActive(bool active)
+{
+	this->active = active;
+}
+
+void Door::draw(sf::RenderTarget & target, sf::RenderStates states) const
+{
+	target.draw(shape);
 }

@@ -59,6 +59,7 @@ void Enemy::applyDamage(int damageTaken)
 void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player)
 {
 	//Create projectile here
+	this->damage = damage;
 	allProjectiles.push_back(Projectile(shape.getPosition(), velocity, size));
 	timeSinceLastShot = 0;
 }
@@ -207,6 +208,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		{
 			if (collision::collides(allProjectiles[i].getShape(), player->getShape(), sf::Vector2f()))
 			{
+				player->applyDamage(damage);
 				allProjectiles.erase(allProjectiles.begin() + i);
 			}
 		}

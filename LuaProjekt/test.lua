@@ -19,6 +19,7 @@ function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
 	normalize(direction);
 	x = direction["x"]*speed;
 	y = direction["y"]*speed;
+	damage = corners-2;
 	return size, damage, y, x, 1;
 end
 function movement( pos, playerPos, size )
