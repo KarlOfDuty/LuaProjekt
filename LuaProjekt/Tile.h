@@ -16,9 +16,11 @@ private:
 	sf::VertexArray m_vertices;
 	sf::Texture m_tileset;
 	std::vector<std::string> tiles;
+	std::vector<Enemy*> allEnemies;
 	void freeMemory();
 public:
 	std::vector<StaticObject*> allStaticObjects;
+	std::vector<Enemy*>& getAllEnemies();
 	std::vector<Door*> allDoors;
 	Tile();
 	~Tile();
