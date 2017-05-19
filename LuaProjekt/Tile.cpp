@@ -139,7 +139,6 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 						{
 							outPos = sf::Vector2f(1160, 480);
 						}
-
 						allDoors.push_back(new Door(quad[0].position, outPos, allDoorInfo[k].mapPath));
 						k = allDoorInfo.size();
 					}
@@ -167,11 +166,10 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 			}
 		}
 	}
-
 	return true;
 }
 
-void Tile::update(float dt, Player* player)
+void Tile::update(lua_State* L, float dt, Player* player)
 {
 	for (int i = 0; i < allDoors.size(); i++)
 	{
@@ -192,7 +190,7 @@ void Tile::update(float dt, Player* player)
 	}
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
-		allEnemies[i]->update(dt, allStaticObjects);
+		allEnemies[i]->update(L, dt, allStaticObjects, player, allEnemies);
 	}
 }
 
