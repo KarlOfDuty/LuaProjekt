@@ -28,7 +28,7 @@ private:
 	sf::Vector2f checkPoint;
 	std::random_device rd;
 
-	std::vector<Projectile*> allProjectiles;
+	std::vector<Projectile> allProjectiles;
 
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
@@ -39,7 +39,7 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void rangedAttack(sf::Vector2f velocity, int damage, int size);
+	void rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	void move(sf::Vector2f dir);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;

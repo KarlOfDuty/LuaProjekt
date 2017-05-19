@@ -14,6 +14,7 @@ private:
 public:
 	Projectile(sf::Vector2f pos, sf::Vector2f velocity, int size);
 	~Projectile();
+	sf::RectangleShape getShape();
 	void update(float dt);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
