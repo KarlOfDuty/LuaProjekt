@@ -173,24 +173,42 @@ void Tile::update(lua_State* L, float dt, Player* player)
 {
 	for (int i = 0; i < allDoors.size(); i++)
 	{
-		if (allDoors[i]->isActive())
+		sf::Vector2f distanceVector = player->getShape().getPosition() - allDoors[i]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 110)
 		{
-			sf::Vector2f distanceVector = player->getShape().getPosition() - allDoors[i]->getCenterPos();
-			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-			if (length < 110)
+			sf::Vector2f mtv;
+			if (collision::collides(allDoors[i]->getShape(), player->getShape(), mtv))
 			{
-				if (collision::collides(allDoors[i]->getShape(), player->getShape(), sf::Vector2f()))
+				if (allDoors[i]->isActive())
 				{
 					player->setPos(allDoors[i]->getPlayerNewPos());
 					loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), allDoors[i]->getMapName(), 16, 12);
 					i = allDoors.size();
 				}
+				else
+				{
+					player->setPos(player->getShape().getPosition() - mtv);
+				}
 			}
 		}
 	}
+	bool enemiesAlive = false;
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
 		allEnemies[i]->update(L, dt, allStaticObjects, player, allEnemies);
+		if (allEnemies[i]->isAlive())
+		{
+			enemiesAlive = true;
+		}
+	}
+	if (!enemiesAlive)
+	{
+		for (int i = 0; i < allDoors.size(); i++)
+		{
+			allDoors[i]->setActive(true);
+			allDoors[i]->getShape().setFillColor(sf::Color::Green);
+		}
 	}
 }
 
@@ -213,5 +231,9 @@ void Tile::draw(sf::RenderTarget &target, sf::RenderStates states)const
 	for (int i = 0; i < allEnemies.size(); i++)
 	{
 		target.draw(*allEnemies[i]);
+	}
+	for (int i = 0; i < allDoors.size(); i++)
+	{
+		target.draw(*allDoors[i]);
 	}
 }
