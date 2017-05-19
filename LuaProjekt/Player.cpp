@@ -16,7 +16,7 @@ Player::Player()
 	attacking = false;
 	direction = sf::Vector2f(0, 1);
 
-	stoppedAttacking = false;
+	stoppedAttacking = true;
 }
 
 Player::~Player()
@@ -93,8 +93,8 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 	else
 	{
 		//Rotation
-		attackBox.rotate(450 * dt);
-		attackBoxRotation += 450 * dt;
+		attackBox.rotate(666 * dt);
+		attackBoxRotation += 666 * dt;
 		if (attackBoxRotation > 180)
 		{
 			attacking = false;
@@ -150,10 +150,55 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}
 	}
-
+	
+	//Collision projectiles
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
 		allProjectiles[i].update(dt);
+		std::vector<StaticObject*> closeObjectsProjectiles;
+		for (int j = 0; j < allStaticObjects.size(); j++)
+		{
+			sf::Vector2f distanceVector = allProjectiles[i].getShape().getPosition() - allStaticObjects[j]->getCenterPos();
+			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+			if (length < 110)
+			{
+				closeObjectsProjectiles.push_back(allStaticObjects[j]);
+			}
+		}
+		for (int j = 0; j < closeObjectsProjectiles.size(); j++)
+		{
+			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape(), sf::Vector2f()))
+			{
+				allProjectiles.erase(allProjectiles.begin() + i);
+				j = closeObjectsProjectiles.size();
+			}
+		}
+	}
+
+	//Check if out of bounds
+	for (int i = 0; i < allProjectiles.size(); i++)
+	{
+		if (allProjectiles[i].getShape().getPosition().x < 0 ||
+			allProjectiles[i].getShape().getPosition().x > 1280 ||
+			allProjectiles[i].getShape().getPosition().y < 0 ||
+			allProjectiles[i].getShape().getPosition().y > 960)
+		{
+			allProjectiles.erase(allProjectiles.begin() + i);
+		}
+	}
+
+	//Collision with enemies
+	for (int i = 0; i < allProjectiles.size(); i++)
+	{
+		for (int j = 0; j < allEnemies.size(); j++)
+		{
+			if (allEnemies[j]->isAlive() && collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape(), sf::Vector2f()))
+			{
+				allEnemies[j]->applyDamage(5);
+				allProjectiles.erase(allProjectiles.begin() + i);
+				j = allEnemies.size();
+			}
+		}
 	}
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
