@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "Enemy.h"
+
 Player::Player()
 {
 	playerShape = sf::CircleShape(50, 4);
@@ -136,6 +138,9 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}
 	}
+
+	//std::cout << playerShape.getPosition().x << std::endl;
+	//std::cout << playerShape.getPosition().y << std::endl;
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
