@@ -12,7 +12,6 @@
 int windowWidth = 1280;
 int windowHeight = 960;
 sf::Clock deltaTime;
-
 std::vector<Enemy*> allEnemies;
 //std::vector<StaticObject*> allStaticObjects;
 

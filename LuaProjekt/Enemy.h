@@ -5,6 +5,7 @@
 #include "StaticObject.h"
 #include "Collision.h"
 #include <random>
+#include "Projectile.h"
 
 class Player;
 
@@ -21,6 +22,9 @@ private:
 	int goTo;
 	sf::Vector2f checkPoint;
 	std::random_device rd;
+
+	std::vector<Projectile*> allProjectiles;
+
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
 	~Enemy();
