@@ -8,8 +8,8 @@ function normalize(vec)
 	vec["y"] = vec["y"] / l;
 end
 function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
-	if(timeSinceLastShot > timeSinceLastShot*corners)
-		return false;
+	if timeSinceLastShot > timeSinceLastShot*corners then
+		return 0;
 	end
 	direction = {};
 	speed = 1000/corners;
@@ -19,7 +19,7 @@ function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
 	normalize(direction);
 	x = direction["x"]*speed;
 	y = direction["y"]*speed;
-	return true, x, y, damage, size;
+	return 1, x, y, damage, size;
 end
 function movement( pos, playerPos )
 	vector = {};

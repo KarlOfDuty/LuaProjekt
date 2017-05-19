@@ -28,6 +28,7 @@ private:
 	std::random_device rd;
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
+	Enemy(int nr, sf::Vector2f pos);
 	~Enemy();
 	sf::CircleShape getShape();
 	bool isAlive();

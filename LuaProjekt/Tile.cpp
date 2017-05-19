@@ -1,8 +1,12 @@
 #include "Tile.h"
 
+std::vector<Enemy*>& Tile::getAllEnemies()
+{
+	return this->allEnemies;
+}
+
 Tile::Tile()
 {
-
 }
 
 Tile::~Tile()
@@ -16,33 +20,38 @@ void Tile::freeMemory()
 	{
 		delete allStaticObjects[i];
 	}
+	allStaticObjects.clear();
 	for (int i = 0; i < allDoors.size(); i++)
 	{
 		delete allDoors[i];
 	}
+	allDoors.clear();
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		delete allEnemies[i];
+	}
+	allEnemies.clear();
 }
 
 bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::string mapName, unsigned int width, unsigned int height)
 {
 	freeMemory();
-	allStaticObjects.clear();
-	allDoors.clear();
 	tiles.clear();
 	std::ifstream openFile;
 	openFile.open("tiles/" + mapName + ".txt");
 	std::string num;
+
+	int amountOfDoors;
+	openFile >> amountOfDoors;
 
 	struct doorInfo
 	{
 		std::string tileName;
 		std::string mapPath;
 		std::string outPos;
-		doorInfo(){}
+		doorInfo() {}
 	};
 	std::vector<doorInfo> allDoorInfo;
-
-	int amountOfDoors;
-	openFile >> amountOfDoors;
 
 	for (int i = 0; i < amountOfDoors; i++)
 	{
@@ -130,7 +139,6 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 						{
 							outPos = sf::Vector2f(1160, 480);
 						}
-
 						allDoors.push_back(new Door(quad[0].position, outPos, allDoorInfo[k].mapPath));
 						k = allDoorInfo.size();
 					}
@@ -139,10 +147,29 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 		}
 	}
 
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			int tileNumber;
+			try
+			{
+				tileNumber = std::stoi(tiles[(height*width) + i*width + j]);
+			}
+			catch (std::invalid_argument& e)
+			{
+				tileNumber = 0;
+			}
+			if (tileNumber >= 3)
+			{
+				allEnemies.push_back(new Enemy(tileNumber, sf::Vector2f(j * tileSize.x + tileSize.x / 2, i * tileSize.y + tileSize.y / 2)));
+			}
+		}
+	}
 	return true;
 }
 
-void Tile::update(float dt, Player* player)
+void Tile::update(lua_State* L, float dt, Player* player)
 {
 	for (int i = 0; i < allDoors.size(); i++)
 	{
@@ -161,6 +188,10 @@ void Tile::update(float dt, Player* player)
 			}
 		}
 	}
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		allEnemies[i]->update(L, dt, allStaticObjects, player, allEnemies);
+	}
 }
 
 void Tile::draw(sf::RenderTarget &target, sf::RenderStates states)const
@@ -178,5 +209,9 @@ void Tile::draw(sf::RenderTarget &target, sf::RenderStates states)const
 	for (int i = 0; i < allStaticObjects.size(); i++)
 	{
 		//target.draw(*allStaticObjects[i]);
+	}
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		target.draw(*allEnemies[i]);
 	}
 }

@@ -16,6 +16,17 @@ Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color 
 	this->attack = false;
 	this->checkPoint = pos;
 }
+Enemy::Enemy(int nr, sf::Vector2f pos)
+{
+	this->shape = sf::CircleShape(50, nr);
+	this->shape.setOrigin(50, 50);
+	this->shape.rotate(45);
+	this->shape.setPosition(pos);
+	this->shape.setFillColor(sf::Color::Red);
+	this->health = 7*nr;
+	this->damage = nr;
+	this->alive = true;
+}
 
 Enemy::~Enemy()
 {
@@ -58,6 +69,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		//Movement
 		lua_getglobal(L, "movement");
 
+		//This pos
 		lua_newtable(L);
 		lua_pushstring(L, "x");
 		lua_pushnumber(L, shape.getPosition().x);
@@ -66,6 +78,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_pushnumber(L, shape.getPosition().y);
 		lua_settable(L, -3);
 
+		//Player pos
 		lua_newtable(L);
 		lua_pushstring(L, "x");
 		lua_pushnumber(L, player->getShape().getPosition().x);
@@ -73,7 +86,6 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_pushstring(L, "y");
 		lua_pushnumber(L, player->getShape().getPosition().y);
 		lua_settable(L, -3);
-
 		lua_call(L, 2, 2);
 
 		sf::Vector2f dir;
