@@ -16,7 +16,13 @@ Player::Player()
 	attacking = false;
 	direction = sf::Vector2f(0, 1);
 
+	hp = 10;
+
 	stoppedAttacking = true;
+
+	healthFont.loadFromFile("tiles/arial.ttf");
+	healthText.setFont(healthFont);
+	healthText.setString(std::to_string(hp));
 }
 
 Player::~Player()
@@ -26,6 +32,22 @@ Player::~Player()
 sf::CircleShape Player::getShape()
 {
 	return playerShape;
+}
+void Player::resetHP()
+{
+	hp = 10;
+}
+void Player::applyDamage(int damage)
+{
+	if (invincibilityClock.getElapsedTime().asSeconds() > 0.5f)
+	{
+		hp -= damage;
+		if (hp < 0)
+		{
+			hp = 0;
+		}
+		invincibilityClock.restart();
+	}
 }
 void Player::shoot()
 {
@@ -41,6 +63,7 @@ void Player::setPos(sf::Vector2f newPos)
 }
 void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
+	healthText.setString(std::to_string(hp));
 	if (!attacking)
 	{
 		if (stoppedAttacking)
@@ -203,18 +226,21 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
-	target.draw(playerShape);
-	if (attacking)
+	target.draw(healthText);
+	if (hp > 0)
 	{
-		target.draw(attackBox);
+		target.draw(playerShape);
+		if (attacking)
+		{
+			target.draw(attackBox);
+		}
+		for (int i = 0; i < debugPoints.size(); i++)
+		{
+			target.draw(debugPoints[i]);
+		}
+		for (int i = 0; i < allProjectiles.size(); i++)
+		{
+			target.draw(allProjectiles[i]);
+		}
 	}
-	for (int i = 0; i < debugPoints.size(); i++)
-	{
-		target.draw(debugPoints[i]);
-	}
-	for (int i = 0; i < allProjectiles.size(); i++)
-	{
-		target.draw(allProjectiles[i]);
-	}
-
 }

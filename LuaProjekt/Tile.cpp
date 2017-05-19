@@ -183,6 +183,7 @@ void Tile::update(lua_State* L, float dt, Player* player)
 				if (allDoors[i]->isActive())
 				{
 					player->setPos(allDoors[i]->getPlayerNewPos());
+					player->resetHP();
 					loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), allDoors[i]->getMapName(), 16, 12);
 					i = allDoors.size();
 				}

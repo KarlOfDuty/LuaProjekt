@@ -20,10 +20,16 @@ private:
 	sf::Clock shootDelay;
 	std::vector<sf::RectangleShape> debugPoints;
 	std::vector<Projectile> allProjectiles;
+	sf::Clock invincibilityClock;
+	
+	sf::Font healthFont;
+	sf::Text healthText;
 public:
 	Player();
 	~Player();
 	sf::CircleShape getShape();
+	void resetHP();
+	void applyDamage(int damage);
 	void shoot();
 	void setPos(sf::Vector2f newPos);
 	void update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
