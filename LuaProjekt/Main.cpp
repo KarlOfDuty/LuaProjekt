@@ -1,4 +1,4 @@
-#include<SFML/Window.hpp>
+#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <thread>
 #include "Player.h"
@@ -15,9 +15,6 @@ extern "C" {
 int windowWidth = 1280;
 int windowHeight = 960;
 sf::Clock deltaTime;
-
-//std::vector<Enemy*> allEnemies;
-//std::vector<StaticObject*> allStaticObjects;
 
 Player* player;
 Tile mapTile;
