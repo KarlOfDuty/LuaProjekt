@@ -16,7 +16,7 @@ Player::Player()
 	attacking = false;
 	direction = sf::Vector2f(0, 1);
 
-	stoppedAttacking = false;
+	stoppedAttacking = true;
 }
 
 Player::~Player()
@@ -192,7 +192,7 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 	{
 		for (int j = 0; j < allEnemies.size(); j++)
 		{
-			if (collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape(), sf::Vector2f()))
+			if (allEnemies[j]->isAlive() && collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape(), sf::Vector2f()))
 			{
 				allEnemies[j]->applyDamage(5);
 				allProjectiles.erase(allProjectiles.begin() + i);

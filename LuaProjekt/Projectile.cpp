@@ -4,7 +4,7 @@ Projectile::Projectile(sf::Vector2f pos, sf::Vector2f velocity, int size)
 {
 	projectile.setSize(sf::Vector2f(size, size));
 	projectile.setPosition(pos);
-	projectile.setFillColor(sf::Color::Green);
+	projectile.setFillColor(sf::Color::Blue);
 	this->velocity = velocity;
 }
 

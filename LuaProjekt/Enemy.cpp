@@ -18,12 +18,12 @@ Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color 
 }
 Enemy::Enemy(int nr, sf::Vector2f pos)
 {
-	this->shape = sf::CircleShape(50, nr);
-	this->shape.setOrigin(50, 50);
+	this->shape = sf::CircleShape(10*nr, nr);
+	this->shape.setOrigin(10*nr, 10*nr);
 	this->shape.rotate(45);
 	this->shape.setPosition(pos);
 	this->shape.setFillColor(sf::Color::Red);
-	this->health = 7*nr;
+	this->health = (nr-2)*nr;
 	this->damage = nr;
 	this->alive = true;
 }
@@ -59,9 +59,7 @@ void Enemy::applyDamage(int damageTaken)
 void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player)
 {
 	//Create projectile here
-	float rotation = -atan2(shape.getPosition().x -player->getShape().getPosition().x, shape.getPosition().y - player->getShape().getPosition().y);
-	sf::Vector2f direction = collision::normalize(sf::Vector2f(sin(rotation), -cos(rotation)));
-	allProjectiles.push_back(Projectile(shape.getPosition(), direction*900.0f, 15));
+	allProjectiles.push_back(Projectile(shape.getPosition(), velocity, size));
 	timeSinceLastShot = 0;
 }
 void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
@@ -89,7 +87,10 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_pushstring(L, "y");
 		lua_pushnumber(L, player->getShape().getPosition().y);
 		lua_settable(L, -3);
-		lua_call(L, 2, 2);
+
+		lua_pushnumber(L, shape.getPointCount());
+
+		lua_call(L, 3, 2);
 
 		sf::Vector2f dir;
 		dir.x = (float)lua_tonumber(L, -1);
@@ -121,14 +122,12 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 
 		//Numbers
 		lua_pushnumber(L, timeSinceLastShot);
-		lua_pushnumber(L, player->getShape().getPointCount());
-
+		lua_pushnumber(L, shape.getPointCount());
 		lua_call(L, 4, 5);
 
-		bool shoot = false;
-		shoot = (bool)lua_tointeger(L, -1);
+		bool shoot = true;
+		shoot = (int)lua_tointeger(L, -1);
 		lua_pop(L, 1);
-
 		if (shoot)
 		{
 			sf::Vector2f velocity;
@@ -138,11 +137,11 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 
 			lua_pop(L, 1);
 			int damage = 0;
-			damage = (int)lua_tointeger(L, -1);
+			damage = (int)lua_tonumber(L, -1);
 			lua_pop(L, 1);
 
 			int size = 0;
-			size = (int)lua_tointeger(L, -1);
+			size = (int)lua_tonumber(L, -1);
 			lua_pop(L, 1);
 			rangedAttack(velocity*dt, damage, size, player);
 		}
@@ -243,9 +242,10 @@ void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const
 	if (alive)
 	{
 		target.draw(shape);
-	}
-	for (int i = 0; i < allProjectiles.size(); i++)
-	{
-		target.draw(allProjectiles[i]);
+		
+		for (int i = 0; i < allProjectiles.size(); i++)
+		{
+			target.draw(allProjectiles[i]);
+		}
 	}
 }
