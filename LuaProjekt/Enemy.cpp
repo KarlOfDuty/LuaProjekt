@@ -45,10 +45,17 @@ void Enemy::applyDamage(int damageTaken)
 		alive = false;
 	}
 }
+void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size)
+{
+	//Create projectile here
+	timeSinceLastShot = 0;
+}
 void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
 {
+	timeSinceLastShot += dt;
 	if (alive)
 	{	
+		//Movement
 		lua_getglobal(L, "movement");
 
 		lua_newtable(L);
@@ -75,6 +82,55 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		dir.y = (float)lua_tonumber(L, -1);
 		lua_pop(L, 1);
 		move(dir*dt);
+
+		//Ranged attack
+		lua_getglobal(L, "rangedAttack");
+
+		//This pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, shape.getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, shape.getPosition().y);
+		lua_settable(L, -3);
+
+		//Player pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, player->getShape().getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, player->getShape().getPosition().y);
+		lua_settable(L, -3);
+
+		//Numbers
+		lua_pushnumber(L, timeSinceLastShot);
+		lua_pushnumber(L, player->getShape().getPointCount());
+
+		lua_call(L, 4, 5);
+
+		bool shoot = false;
+		shoot = (bool)lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		if (shoot)
+		{
+			sf::Vector2f velocity;
+			velocity.x = (float)lua_tonumber(L, -1);
+			lua_pop(L, 1);
+			velocity.y = (float)lua_tonumber(L, -1);
+
+			lua_pop(L, 1);
+			int damage = 0;
+			damage = (int)lua_tointeger(L, -1);
+			lua_pop(L, 1);
+
+			int size = 0;
+			size = (int)lua_tointeger(L, -1);
+			lua_pop(L, 1);
+			rangedAttack(velocity*dt, damage, size);
+		}
 
 		//Collision with static objects
 		std::vector<StaticObject*> closeObjects;

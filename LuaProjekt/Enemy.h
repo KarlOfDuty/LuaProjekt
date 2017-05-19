@@ -23,6 +23,7 @@ private:
 	int amountOfCorners;
 	bool attack;
 	int goTo;
+	float timeSinceLastShot;
 	sf::Vector2f checkPoint;
 	std::random_device rd;
 public:
@@ -33,6 +34,7 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
+	void rangedAttack(sf::Vector2f velocity, int damage, int size);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	void move(sf::Vector2f dir);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
