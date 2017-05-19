@@ -36,6 +36,7 @@ int main()
 	settings.antialiasingLevel = 2;
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Lua", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
+
 	//Activate the window
 	window.setActive(true);
 
