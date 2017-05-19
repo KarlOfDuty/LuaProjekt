@@ -155,7 +155,6 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 	{
 		allProjectiles[i].update(dt);
 	}
-
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {

@@ -16,6 +16,17 @@ Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color 
 	this->attack = false;
 	this->checkPoint = pos;
 }
+Enemy::Enemy(int nr, sf::Vector2f pos)
+{
+	this->shape = sf::CircleShape(50, nr);
+	this->shape.setOrigin(50, 50);
+	this->shape.rotate(45);
+	this->shape.setPosition(pos);
+	this->shape.setFillColor(sf::Color::Red);
+	this->health = 7*nr;
+	this->damage = nr;
+	this->alive = true;
+}
 
 Enemy::~Enemy()
 {
@@ -45,119 +56,94 @@ void Enemy::applyDamage(int damageTaken)
 		alive = false;
 	}
 }
-
-void Enemy::AILogic(float dt, Player *player)
+void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size)
 {
-	if (amountOfCorners == 3)
-	{
-		if (fabs(player->getShape().getPosition().y - shape.getPosition().y) > 0.5f)
-		{
-			if (player->getShape().getPosition().y > shape.getPosition().y)
-			{
-				shape.setPosition(shape.getPosition().x, shape.getPosition().y + 150 * dt);
-			}
-			else if (player->getShape().getPosition().y < shape.getPosition().y)
-			{
-				shape.setPosition(shape.getPosition().x, shape.getPosition().y - 150 * dt);
-			}
-		}
-
-		if (fabs(player->getShape().getPosition().x - shape.getPosition().x) > 0.5f)
-		{
-			if (player->getShape().getPosition().x > shape.getPosition().x)
-			{
-				shape.setPosition(shape.getPosition().x + 150 * dt, shape.getPosition().y);
-			}
-			else if (player->getShape().getPosition().x < shape.getPosition().x)
-			{
-				shape.setPosition(shape.getPosition().x - 150 * dt, shape.getPosition().y);
-			}
-		}
-	}
-	if (amountOfCorners == 6)
-	{
-		std::mt19937 rng(rd());
-		std::uniform_int_distribution<> point(1, 4);
-		if (attack)
-		{
-			
-		}
-		if (!attack)
-		{
-			if (fabs(checkPoint.y - shape.getPosition().y) < 6.0f && fabs(checkPoint.x - shape.getPosition().x) < 6.0f)
-			{
-				std::cout << "checkpoint not reached" << std::endl;
-				goTo = point(rng);
-
-				if (goTo == 1)
-				{
-					checkPoint = sf::Vector2f(123, 125);
-				}
-				if (goTo == 2)
-				{
-					checkPoint = sf::Vector2f(1155, 125);
-				}
-				if (goTo == 3)
-				{
-					checkPoint = sf::Vector2f(1155, 834);
-				}
-				if (goTo == 4)
-				{
-					checkPoint = sf::Vector2f(123, 834);
-				}
-			}
-			if (fabs(checkPoint.y - shape.getPosition().y) > 6.0f)
-			{
-				if (checkPoint.y > shape.getPosition().y)
-				{
-					shape.setPosition(shape.getPosition().x, shape.getPosition().y + 150 * dt);
-				}
-				else if (checkPoint.y < shape.getPosition().y)
-				{
-					shape.setPosition(shape.getPosition().x, shape.getPosition().y - 150 * dt);
-				}
-			}
-
-			if (fabs(checkPoint.x - shape.getPosition().x) > 6.0f)
-			{
-				if (checkPoint.x > shape.getPosition().x)
-				{
-					shape.setPosition(shape.getPosition().x + 150 * dt, shape.getPosition().y);
-				}
-				else if (checkPoint.x < shape.getPosition().x)
-				{
-					shape.setPosition(shape.getPosition().x - 150 * dt, shape.getPosition().y);
-				}
-			}
-
-			if (fabs(checkPoint.y - shape.getPosition().y) > 6.0f && fabs(checkPoint.x - shape.getPosition().x) > 6.0f)
-			{
-				attack = true;
-			}
-		}
-	}
+	//Create projectile here
+	timeSinceLastShot = 0;
 }
-
-void Enemy::update(float dt, std::vector<StaticObject*> &allStaticObjects, Player *player)
+void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
 {
+	timeSinceLastShot += dt;
 	if (alive)
 	{	
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		//Movement
+		lua_getglobal(L, "movement");
+
+		//This pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, shape.getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, shape.getPosition().y);
+		lua_settable(L, -3);
+
+		//Player pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, player->getShape().getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, player->getShape().getPosition().y);
+		lua_settable(L, -3);
+		lua_call(L, 2, 2);
+
+		sf::Vector2f dir;
+		dir.x = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		dir.y = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		move(dir*dt);
+
+		//Ranged attack
+		lua_getglobal(L, "rangedAttack");
+
+		//This pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, shape.getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, shape.getPosition().y);
+		lua_settable(L, -3);
+
+		//Player pos
+		lua_newtable(L);
+		lua_pushstring(L, "x");
+		lua_pushnumber(L, player->getShape().getPosition().x);
+		lua_settable(L, -3);
+		lua_pushstring(L, "y");
+		lua_pushnumber(L, player->getShape().getPosition().y);
+		lua_settable(L, -3);
+
+		//Numbers
+		lua_pushnumber(L, timeSinceLastShot);
+		lua_pushnumber(L, player->getShape().getPointCount());
+
+		lua_call(L, 4, 5);
+
+		bool shoot = false;
+		shoot = (bool)lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		if (shoot)
 		{
-			shape.setPosition(shape.getPosition().x - 300 * dt, shape.getPosition().y);
+			sf::Vector2f velocity;
+			velocity.x = (float)lua_tonumber(L, -1);
+			lua_pop(L, 1);
+			velocity.y = (float)lua_tonumber(L, -1);
+
+			lua_pop(L, 1);
+			int damage = 0;
+			damage = (int)lua_tointeger(L, -1);
+			lua_pop(L, 1);
+
+			int size = 0;
+			size = (int)lua_tointeger(L, -1);
+			lua_pop(L, 1);
+			rangedAttack(velocity*dt, damage, size);
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		{
-			shape.setPosition(shape.getPosition().x + 300 * dt, shape.getPosition().y);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		{
-			shape.setPosition(shape.getPosition().x, shape.getPosition().y - 300 * dt);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		{
-			shape.setPosition(shape.getPosition().x, shape.getPosition().y + 300 * dt);
-		}
+
 		//Collision with static objects
 		std::vector<StaticObject*> closeObjects;
 		for (int i = 0; i < allStaticObjects.size(); i++)
@@ -169,20 +155,39 @@ void Enemy::update(float dt, std::vector<StaticObject*> &allStaticObjects, Playe
 				closeObjects.push_back(allStaticObjects[i]);
 			}
 		}
+		for (int i = 0; i < closeObjects.size(); i++)
 		{
-			for (int i = 0; i < closeObjects.size(); i++)
+			sf::Vector2f mtv;
+			if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
 			{
-				sf::Vector2f mtv;
-				if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
-				{
-					shape.setPosition(shape.getPosition() - mtv);
-				}
+				shape.setPosition(shape.getPosition() - mtv);
 			}
 		}
+		//Collision with enemies
 
-		//AI logic: Enemy types
-		AILogic(dt, player);
+		//std::vector<Enemy*> closeEnemies;
+		//for (int i = 0; i < enemies.size(); i++)
+		//{
+		//	sf::Vector2f distanceVector = shape.getPosition() - enemies[i]->getShape().getPosition();
+		//	float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		//	if (length < 150 && length > 0.001)
+		//	{
+		//		closeEnemies.push_back(enemies[i]);
+		//	}
+		//}
+		//for (int i = 0; i < closeEnemies.size(); i++)
+		//{
+		//	sf::Vector2f mtv;
+		//	if (collision::collides(closeEnemies[i]->getShape(), shape, mtv))
+		//	{
+		//		shape.setPosition(shape.getPosition() - mtv);
+		//	}
+		//}
 	}
+}
+void Enemy::move(sf::Vector2f dir)
+{
+	shape.setPosition(shape.getPosition() + dir);
 }
 void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
