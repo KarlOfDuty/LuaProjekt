@@ -13,9 +13,6 @@ int windowWidth = 1280;
 int windowHeight = 960;
 sf::Clock deltaTime;
 
-//std::vector<Enemy*> allEnemies;
-//std::vector<StaticObject*> allStaticObjects;
-
 Player* player;
 Tile mapTile;
 
@@ -35,6 +32,7 @@ int main()
 	settings.antialiasingLevel = 2;
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Lua", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
+
 	//Activate the window
 	window.setActive(true);
 
@@ -70,6 +68,7 @@ int main()
 	}
 	//Release resources...
 	delete player;
+	lua_close(L);
 	return 0;
 }
 
