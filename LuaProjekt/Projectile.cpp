@@ -13,6 +13,11 @@ Projectile::~Projectile()
 
 }
 
+sf::RectangleShape Projectile::getShape()
+{
+	return projectile;
+}
+
 void Projectile::update(float dt)
 {
 	projectile.setPosition(projectile.getPosition().x + velocity.x*dt, projectile.getPosition().y + velocity.y*dt);

@@ -136,6 +136,73 @@ bool collision::collides(sf::RectangleShape shape1, sf::CircleShape shape2, sf::
 	return true;
 }
 
+bool collision::collides(sf::RectangleShape shape1, sf::RectangleShape shape2, sf::Vector2f &mtv)
+{
+	std::vector<sf::Vector2f> points1 = collision::getPoints(shape1);
+
+	std::vector<sf::Vector2f> points2 = collision::getPoints(shape2);
+
+	float o = 1000000000;
+	sf::Vector2f smallestAxis;
+	std::vector<sf::Vector2f> axis1 = getAxis(points1);
+	std::vector<sf::Vector2f> axis2 = getAxis(points2);
+
+	for (size_t i = 0; i < axis1.size(); i++) {
+		sf::Vector2f thisAxis = axis1[i];
+
+		float s1min, s1max;
+		projectOnAxis(points1, thisAxis, s1min, s1max);
+		float s2min, s2max;
+		projectOnAxis(points2, thisAxis, s2min, s2max);
+
+		if (s2min > s1max || s2max < s1min) {
+			return false;
+		}
+
+		float overlap;
+		if (s1max < s2min) {
+			overlap = s1max - s2min;
+		}
+		else
+		{
+			overlap = s2max - s1min;
+		}
+		if (overlap < o)
+		{
+			o = overlap;
+			smallestAxis = thisAxis;
+		}
+	}
+	for (size_t i = 0; i < axis2.size(); i++) {
+		sf::Vector2f thisAxis = axis2[i];
+
+		float s1min, s1max;
+		projectOnAxis(points1, thisAxis, s1min, s1max);
+		float s2min, s2max;
+		projectOnAxis(points2, thisAxis, s2min, s2max);
+
+		if (s2max < s1min || s1max < s2min) {
+			return false;
+		}
+
+		float overlap;
+		if (s1max < s2min) {
+			overlap = s1max - s2min;
+		}
+		else
+		{
+			overlap = s2max - s1min;
+		}
+		if (overlap < o)
+		{
+			o = overlap;
+			smallestAxis = thisAxis;
+		}
+	}
+	mtv = smallestAxis*o;
+	return true;
+}
+
 std::vector<sf::Vector2f> collision::getPoints(sf::RectangleShape shape)
 {
 	std::vector<sf::Vector2f> points;
