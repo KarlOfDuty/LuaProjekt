@@ -27,6 +27,14 @@ sf::CircleShape Player::getShape()
 {
 	return playerShape;
 }
+void Player::shoot()
+{
+	if (shootDelay.getElapsedTime().asSeconds() >= 0.6)
+	{
+		allProjectiles.push_back(Projectile(playerShape.getPosition(), direction*900.0f, 15));
+		shootDelay.restart();
+	}
+}
 void Player::setPos(sf::Vector2f newPos)
 {
 	this->playerShape.setPosition(newPos);
@@ -63,6 +71,10 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		{
 			playerShape.setPosition(playerShape.getPosition().x, playerShape.getPosition().y + 300 * dt);
 			direction = sf::Vector2f(0, 1);
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+		{
+			shoot();
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
@@ -139,8 +151,11 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 	}
 
-	std::cout << playerShape.getPosition().x << std::endl;
-	std::cout << playerShape.getPosition().y << std::endl;
+	for (int i = 0; i < allProjectiles.size(); i++)
+	{
+		allProjectiles[i].update(dt);
+	}
+
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
@@ -153,4 +168,9 @@ void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 	{
 		target.draw(debugPoints[i]);
 	}
+	for (int i = 0; i < allProjectiles.size(); i++)
+	{
+		target.draw(allProjectiles[i]);
+	}
+
 }

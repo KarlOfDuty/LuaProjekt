@@ -1,11 +1,11 @@
 #include "Projectile.h"
 
-Projectile::Projectile()
+Projectile::Projectile(sf::Vector2f pos, sf::Vector2f velocity, int size)
 {
-	projectile.setSize(sf::Vector2f(10, 10));
-	projectile.setPosition(0, 0);
+	projectile.setSize(sf::Vector2f(size, size));
+	projectile.setPosition(pos);
 	projectile.setFillColor(sf::Color::Green);
-	direction = sf::Vector2f(0, 1);
+	this->velocity = velocity;
 }
 
 Projectile::~Projectile()
@@ -13,10 +13,12 @@ Projectile::~Projectile()
 
 }
 
-void Projectile::update(float dt, std::vector<StaticObject*>& allStaticObjects, Player * player)
+void Projectile::update(float dt)
 {
+	projectile.setPosition(projectile.getPosition().x + velocity.x*dt, projectile.getPosition().y + velocity.y*dt);
 }
 
 void Projectile::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
+	target.draw(projectile);
 }
