@@ -95,7 +95,7 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 			playerShape.setPosition(playerShape.getPosition().x, playerShape.getPosition().y + 300 * dt);
 			direction = sf::Vector2f(0, 1);
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
 			shoot();
 		}
