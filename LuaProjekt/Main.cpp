@@ -19,7 +19,7 @@ sf::Clock deltaTime;
 Player* player;
 Tile mapTile;
 lua_State* L;
-std::string AIPath = "test.lua";
+std::string AIPath = "AI.lua";
 void update();
 void reloadLua();
 int main()
