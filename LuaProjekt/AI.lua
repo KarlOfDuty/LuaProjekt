@@ -17,7 +17,7 @@ function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
 	--Decrease speed for larger enemies
 	speed = 100000/corners;
 	--Increase size for enemies with more corners
-	size = corners^2;
+	size = (corners^2)*1.1;
 	--Increase damage depending on size
 	damage = corners-2;
 	--Calculate the direction to fire
