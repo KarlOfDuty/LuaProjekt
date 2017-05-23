@@ -1,6 +1,5 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <thread>
 #include "Player.h"
 #include "collision.h"
 #include "Tile.h"
@@ -41,6 +40,7 @@ int main()
 	window.setActive(true);
 
 	player = new Player();
+
 	if (!mapTile.loadMap("tiles/finetiles.png", sf::Vector2u(80, 80), "map1", 16, 12))
 		return -1;
 

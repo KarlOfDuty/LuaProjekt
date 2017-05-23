@@ -25,8 +25,6 @@ private:
 	bool attack;
 	int goTo;
 	float timeSinceLastShot;
-	sf::Vector2f checkPoint;
-	std::random_device rd;
 
 	std::vector<Projectile> allProjectiles;
 

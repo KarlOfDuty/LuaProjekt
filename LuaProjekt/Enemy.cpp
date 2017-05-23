@@ -14,7 +14,6 @@ Enemy::Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color 
 	this->alive = true;
 	this->amountOfCorners = amountOfCorners;
 	this->attack = false;
-	this->checkPoint = pos;
 }
 Enemy::Enemy(int nr, sf::Vector2f pos)
 {
