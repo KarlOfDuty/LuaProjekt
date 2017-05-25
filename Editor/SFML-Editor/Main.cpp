@@ -36,19 +36,24 @@ int main()
 	tileText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
 	
 	//MENU OBJECTS
+	sf::Texture* plusTexture = new sf::Texture;
+	plusTexture->loadFromFile("textures/plus.png");
+	sf::Texture* minusTexture = new sf::Texture;
+	minusTexture->loadFromFile("textures/minus.png");
 	menuBackGround = sf::RectangleShape(sf::Vector2f(220, 940));
 	menuBackGround.setFillColor(sf::Color(90, 90, 90));
 	menuBackGround.setPosition(1290, 10);
 	menuButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
 	menuButtonAdd.setOrigin(20, 20);
-	menuButtonAdd.setFillColor(sf::Color(200, 200, 200));
+	menuButtonAdd.setTexture(plusTexture);
 	menuButtonAdd.setOutlineColor(sf::Color::Black);
 	menuButtonAdd.setOutlineThickness(2);
 	menuButtonSubtract = menuButtonAdd;
+	menuButtonSubtract.setTexture(minusTexture);
 	
 	//LOADING TEXTURES
 	sf::Image tileset;
-	if (!tileset.loadFromFile("finetiles.png"))
+	if (!tileset.loadFromFile("textures/finetiles.png"))
 	{
 		return -1;
 	}
