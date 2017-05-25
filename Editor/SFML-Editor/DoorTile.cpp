@@ -1,31 +1,32 @@
-#include "doorTile.h"
+#include "DoorTile.h"
+
 DoorTile::DoorTile(sf::RectangleShape tileShape) : Tile(tileShape)
 {
-    tileName = "tile";
-    mapName = "map";
-    outDirection = "N";
+	tileName = "tile";
+	mapName = "map";
+	outDirection = "N";
 }
 void DoorTile::setTileName(std::string tileName)
 {
-    this->tileName = tileName;
+	this->tileName = tileName;
 }
 void DoorTile::setMapName(std::string mapName)
 {
-    this->mapName = mapName;
+	this->mapName = mapName;
 }
 void DoorTile::setOutDirection(std::string outDirection)
 {
-    this->outDirection = outDirection;
+	this->outDirection = outDirection;
 }
 std::string DoorTile::getTileName()
 {
-    return tileName;
+	return tileName;
 }
 std::string DoorTile::getMapName()
 {
-    return mapName;
+	return mapName;
 }
 std::string DoorTile::getOutDirection()
 {
-    return outDirection;
+	return outDirection;
 }
