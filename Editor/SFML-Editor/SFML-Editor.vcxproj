@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClCompile Include="DoorTile.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="StaticObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DoorTile.h" />
+    <ClInclude Include="StaticObject.h" />
     <ClInclude Include="Tile.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
