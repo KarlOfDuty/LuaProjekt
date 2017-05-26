@@ -14,12 +14,19 @@ Tile* markedTile;
 sf::RectangleShape menuBackGround;
 sf::RectangleShape menuButtonAdd;
 sf::RectangleShape menuButtonSubtract;
+sf::RectangleShape editButtonAdd;
+sf::RectangleShape editButtonSubtract;
 sf::Font font;
 sf::Text tileText;
+sf::Text tileTextRed;
+
+bool editMapName = false;
+bool editTileName = false;
+bool editOutDir = false;
 
 void update(sf::RenderWindow &window);
 void menuDrawing(sf::RenderWindow &window);
-void setCenteredText(std::string text);
+void setCenteredText(std::string text, sf::Text &tileTexture);
 
 int main()
 {
@@ -34,6 +41,13 @@ int main()
 	tileText.setCharacterSize(24);
 	sf::FloatRect textRect = tileText.getLocalBounds();
 	tileText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+
+	tileTextRed.setFont(font);
+	tileTextRed.setString("TESTING TEXT");
+	tileTextRed.setFillColor(sf::Color::Red);
+	tileTextRed.setCharacterSize(24);
+	sf::FloatRect textRectRed = tileTextRed.getLocalBounds();
+	tileTextRed.setOrigin(textRectRed.left + textRectRed.width / 2.0f, textRectRed.top + textRectRed.height / 2.0f);
 	
 	//MENU OBJECTS
 	sf::Texture* plusTexture = new sf::Texture;
@@ -50,6 +64,14 @@ int main()
 	menuButtonAdd.setOutlineThickness(2);
 	menuButtonSubtract = menuButtonAdd;
 	menuButtonSubtract.setTexture(minusTexture);
+
+	editButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
+	editButtonAdd.setOrigin(20, 20);
+	editButtonAdd.setTexture(plusTexture);
+	editButtonAdd.setOutlineColor(sf::Color::Black);
+	editButtonAdd.setOutlineThickness(2);
+	editButtonSubtract = editButtonAdd;
+	editButtonSubtract.setTexture(minusTexture);
 	
 	//LOADING TEXTURES
 	sf::Image tileset;
@@ -100,9 +122,12 @@ int main()
 						markedTile->shape.setOutlineThickness(0);
 					}
 					markedTile = allTiles[y * 16 + x];
+					editMapName = false;
+					editOutDir = false;
+					editTileName = false;
 					markedTile->shape.setOutlineThickness(2);
 				}
-				if (sf::Mouse::getPosition(window).x >= menuButtonSubtract.getPosition().x-20 && sf::Mouse::getPosition(window).x <= menuButtonSubtract.getPosition().x+20)
+				if (sf::Mouse::getPosition(window).x >= menuButtonSubtract.getPosition().x-20 && sf::Mouse::getPosition(window).x <= menuButtonSubtract.getPosition().x+20 && sf::Mouse::getPosition(window).y >= menuButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= menuButtonSubtract.getPosition().y + 20)
 				{
 					StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 					if (staticObject != nullptr)
@@ -110,12 +135,75 @@ int main()
 						staticObject->subtractNumber(allTextures);
 					}
 				}
-				if (sf::Mouse::getPosition(window).x >= menuButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= menuButtonAdd.getPosition().x + 20)
+				if (sf::Mouse::getPosition(window).x >= menuButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= menuButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= menuButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= menuButtonAdd.getPosition().y + 20)
 				{
 					StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 					if (staticObject != nullptr)
 					{
 						staticObject->addNumber(allTextures);
+					}
+				}
+
+				if (markedTile != nullptr)
+				{
+					DoorTile* door = dynamic_cast<DoorTile*>(markedTile);
+					if (door != nullptr)
+					{
+						if (sf::Mouse::getPosition(window).x >= 1400 - 20 && sf::Mouse::getPosition(window).x <= 1400 + 20 && sf::Mouse::getPosition(window).y >= 350 - 20 && sf::Mouse::getPosition(window).y <= 350 + 20)
+						{
+							editMapName = true;
+							editOutDir = false;
+							editTileName = false;
+						}
+						else if (sf::Mouse::getPosition(window).x >= 1400 - 20 && sf::Mouse::getPosition(window).x <= 1400 + 20 && sf::Mouse::getPosition(window).y >= 250 - 20 && sf::Mouse::getPosition(window).y <= 250 + 20)
+						{
+							editTileName = true;
+							editMapName = false;
+							editOutDir = false;
+						}
+						else if (sf::Mouse::getPosition(window).x >= 1400 - 20 && sf::Mouse::getPosition(window).x <= 1400 + 20 && sf::Mouse::getPosition(window).y >= 450 - 20 && sf::Mouse::getPosition(window).y <= 450 + 20)
+						{
+							editOutDir = true;
+							editMapName = false;
+							editTileName = false;
+						}
+
+						if (editMapName)
+						{
+							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							{
+								if ((door->getMapNum() - 1) != 0)
+								{
+									door->decreaseMapNum(1);
+								}
+							}
+							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							{
+								door->increaseMapNum(1);
+							}
+						}
+						else if (editTileName)
+						{
+							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							{
+								door->decreaseTileName();
+							}
+							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							{
+								door->increaseTileName();
+							}
+						}
+						else if (editOutDir)
+						{
+							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							{
+								door->decreaseMapDir();
+							}
+							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							{
+								door->increaseMapDir();
+							}
+						}
 					}
 				}
 			}
@@ -153,6 +241,24 @@ int main()
 					temp.setOutlineColor(sf::Color::Magenta);
 					temp.setTexture(allTextures[0]);
 					allTiles[y * 16 + x] = new StaticObject(temp,0);
+				}
+			}
+			else if (event.type == sf::Event::KeyPressed && event.mouseButton.button == sf::Keyboard::A)
+			{
+				int x = round(sf::Mouse::getPosition(window).x / 80);
+				int y = round(sf::Mouse::getPosition(window).y / 80);
+				if (x < 16 && y < 12)
+				{
+					Tile* oldTile = allTiles[y * 16 + x];
+					if (markedTile == oldTile)
+					{
+						markedTile = nullptr;
+					}
+					sf::RectangleShape temp(sf::Vector2f(80, 80));
+					temp.setPosition(x * 80, y * 80);
+					temp.setOutlineColor(sf::Color::Magenta);
+					temp.setTexture(allTextures[0]);
+					allTiles[y * 16 + x] = new StaticObject(temp, 0);
 				}
 			}
 			else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete)
@@ -216,37 +322,71 @@ void menuDrawing(sf::RenderWindow &window)
 		StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 		if (door != nullptr)
 		{
-			setCenteredText("Door");
+			setCenteredText("Door", tileText);
 			tileText.setPosition(1400, 30);
 			window.draw(tileText);
-			setCenteredText("Tile name:");
+			setCenteredText("Tile name:", tileText);
 			tileText.setPosition(1400, 200);
 			window.draw(tileText);
-			setCenteredText(door->getTileName());
-			tileText.setPosition(1400, 250);
-			window.draw(tileText);
-			setCenteredText("Map name:");
+			if (!editTileName)
+			{
+				setCenteredText(door->getTileName(), tileText);
+				tileText.setPosition(1400, 250);
+				window.draw(tileText);
+			}
+			else if(editTileName)
+			{
+				setCenteredText(door->getTileName(), tileTextRed);
+				tileTextRed.setPosition(1400, 250);
+				window.draw(tileTextRed);
+			}
+			setCenteredText("Map name:", tileText);
 			tileText.setPosition(1400, 300);
 			window.draw(tileText);
-			setCenteredText(door->getMapName());
-			tileText.setPosition(1400, 350);
-			window.draw(tileText);
-			setCenteredText("Out direction:");
+			if (!editMapName)
+			{
+				setCenteredText(door->getMapName(), tileText);
+				tileText.setPosition(1400, 350);
+				window.draw(tileText);
+			}
+			else if (editMapName)
+			{
+				setCenteredText(door->getMapName(), tileTextRed);
+				tileTextRed.setPosition(1400, 350);
+				window.draw(tileTextRed);
+			}
+			setCenteredText("Out direction:", tileText);
 			tileText.setPosition(1400, 400);
 			window.draw(tileText);
-			setCenteredText(door->getOutDirection());
-			tileText.setPosition(1400, 450);
-			window.draw(tileText);
+			if (!editOutDir)
+			{
+				setCenteredText(door->getOutDirection(), tileText);
+				tileText.setPosition(1400, 450);
+				window.draw(tileText);
+			}
+			else if (editOutDir)
+			{
+				setCenteredText(door->getOutDirection(), tileTextRed);
+				tileTextRed.setPosition(1400, 450);
+				window.draw(tileTextRed);
+			}
+			if (editMapName || editOutDir || editTileName)
+			{
+				editButtonSubtract.setPosition(1350, 500);
+				window.draw(editButtonSubtract);
+				editButtonAdd.setPosition(1450, 500);
+				window.draw(editButtonAdd);
+			}
 		}
 		else if (staticObject != nullptr)
 		{
-			setCenteredText("Static Object");
+			setCenteredText("Static Object", tileText);
 			tileText.setPosition(1400, 30);
 			window.draw(tileText);
-			setCenteredText("Tile number:");
+			setCenteredText("Tile number:", tileText);
 			tileText.setPosition(1400, 200);
 			window.draw(tileText);
-			setCenteredText(std::to_string(staticObject->getTileNumber()));
+			setCenteredText(std::to_string(staticObject->getTileNumber()), tileText);
 			tileText.setPosition(1400, 250);
 			window.draw(tileText);
 			menuButtonSubtract.setPosition(1350, 250);
@@ -256,22 +396,22 @@ void menuDrawing(sf::RenderWindow &window)
 		}
 		else
 		{
-			setCenteredText("Nothing");
+			setCenteredText("Nothing", tileText);
 			tileText.setPosition(1400, 30);
 			window.draw(tileText);
 		}
 	}
 	else
 	{
-		setCenteredText("Nothing Marked");
+		setCenteredText("Nothing Marked", tileText);
 		tileText.setPosition(1400, 30);
 		window.draw(tileText);
 	}
 }
 
-void setCenteredText(std::string text)
+void setCenteredText(std::string text, sf::Text &tileTexture)
 {
-	tileText.setString(text);
-	sf::FloatRect textRect = tileText.getLocalBounds();
-	tileText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+		tileTexture.setString(text);
+		sf::FloatRect textRect = tileTexture.getLocalBounds();
+		tileTexture.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
 }
