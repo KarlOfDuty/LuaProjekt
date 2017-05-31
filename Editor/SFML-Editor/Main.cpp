@@ -5,6 +5,7 @@
 #include "DoorTile.h"
 #include "StaticObject.h"
 #include "Enemy.h"
+#include <crtdbg.h>
 
 int windowWidth = 1520;
 int windowHeight = 960;
@@ -14,13 +15,12 @@ std::vector<sf::Texture*> allTextures;
 std::vector<Enemy*> allEnemies;
 
 Tile* markedTile;
+sf::Texture* plusTexture;
+sf::Texture* minusTexture;
+sf::Texture* saveMapTexture;
 sf::RectangleShape menuBackGround;
 sf::RectangleShape menuButtonAdd;
 sf::RectangleShape menuButtonSubtract;
-sf::RectangleShape editButtonAdd;
-sf::RectangleShape editButtonSubtract;
-sf::RectangleShape enemyButtonAdd;
-sf::RectangleShape enemyButtonSubtract;
 sf::RectangleShape mapNameAdd;
 sf::RectangleShape mapNameSubtract;
 sf::RectangleShape saveMapButton;
@@ -34,81 +34,17 @@ bool editTileName = false;
 bool editOutDir = false;
 bool editingEnemy = false;
 
-void update(sf::RenderWindow &window);
+void setupMenu();
 void menuDrawing(sf::RenderWindow &window);
-void setCenteredText(std::string text, sf::Text &tileTexture);
+void drawTextAt(std::string text, sf::Text &textObject, int xPos, int yPos, sf::RenderWindow &window);
 void saveMap();
+bool clickedButton(sf::Vector2i mousePos, sf::RectangleShape button);
+void freememory();
 
 int main()
 {
-	//FONT AND TEXT
-	if (!font.loadFromFile("font.ttf"))
-	{
-		return -1;
-	}
-	tileText.setFont(font);
-	tileText.setString("TESTING TEXT");
-	tileText.setFillColor(sf::Color::Green);
-	tileText.setCharacterSize(24);
-	sf::FloatRect textRect = tileText.getLocalBounds();
-	tileText.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-
-	tileTextRed.setFont(font);
-	tileTextRed.setString("TESTING TEXT");
-	tileTextRed.setFillColor(sf::Color::Red);
-	tileTextRed.setCharacterSize(24);
-	sf::FloatRect textRectRed = tileTextRed.getLocalBounds();
-	tileTextRed.setOrigin(textRectRed.left + textRectRed.width / 2.0f, textRectRed.top + textRectRed.height / 2.0f);
-	
-	//MENU OBJECTS
-	sf::Texture* plusTexture = new sf::Texture;
-	plusTexture->loadFromFile("textures/plus.png");
-	sf::Texture* minusTexture = new sf::Texture;
-	minusTexture->loadFromFile("textures/minus.png");
-	sf::Texture* saveMapTexture = new sf::Texture;
-	saveMapTexture->loadFromFile("textures/saveMap.png");
-
-	menuBackGround = sf::RectangleShape(sf::Vector2f(220, 940));
-	menuBackGround.setFillColor(sf::Color(90, 90, 90));
-	menuBackGround.setPosition(1290, 10);
-
-	menuButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	menuButtonAdd.setOrigin(20, 20);
-	menuButtonAdd.setTexture(plusTexture);
-	menuButtonAdd.setOutlineColor(sf::Color::Black);
-	menuButtonAdd.setOutlineThickness(2);
-	menuButtonSubtract = menuButtonAdd;
-	menuButtonSubtract.setTexture(minusTexture);
-
-	editButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	editButtonAdd.setOrigin(20, 20);
-	editButtonAdd.setTexture(plusTexture);
-	editButtonAdd.setOutlineColor(sf::Color::Black);
-	editButtonAdd.setOutlineThickness(2);
-	editButtonSubtract = editButtonAdd;
-	editButtonSubtract.setTexture(minusTexture);
-
-	enemyButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	enemyButtonAdd.setOrigin(20, 20);
-	enemyButtonAdd.setTexture(plusTexture);
-	enemyButtonAdd.setOutlineColor(sf::Color::Black);
-	enemyButtonAdd.setOutlineThickness(2);
-	enemyButtonSubtract = editButtonAdd;
-	enemyButtonSubtract.setTexture(minusTexture);
-	
-	mapNameAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	mapNameAdd.setOrigin(20, 20);
-	mapNameAdd.setTexture(plusTexture);
-	mapNameAdd.setOutlineColor(sf::Color::Black);
-	mapNameAdd.setOutlineThickness(2);
-	mapNameSubtract = mapNameAdd;
-	mapNameSubtract.setTexture(minusTexture);
-	
-	saveMapButton = sf::RectangleShape(sf::Vector2f(200, 70));
-	saveMapButton.setOrigin(100, 35);
-	saveMapButton.setTexture(saveMapTexture);
-	saveMapButton.setOutlineColor(sf::Color::Black);
-	saveMapButton.setOutlineThickness(2);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	setupMenu();
 
 	//LOADING TEXTURES
 	sf::Image tileset;
@@ -138,10 +74,12 @@ int main()
 		}
 	}
 
+	//Create vector with right amount of positions
 	allEnemies = std::vector<Enemy*>(12 * 16);
 
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Editor");
 	window.setVerticalSyncEnabled(true);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -169,7 +107,7 @@ int main()
 				}
 				if (!editingEnemy)
 				{
-					if (sf::Mouse::getPosition(window).x >= menuButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= menuButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= menuButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= menuButtonSubtract.getPosition().y + 20)
+					if (clickedButton(sf::Mouse::getPosition(window),menuButtonSubtract))
 					{
 						StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 						if (staticObject != nullptr)
@@ -177,7 +115,7 @@ int main()
 							staticObject->subtractNumber(allTextures);
 						}
 					}
-					if (sf::Mouse::getPosition(window).x >= menuButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= menuButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= menuButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= menuButtonAdd.getPosition().y + 20)
+					if (clickedButton(sf::Mouse::getPosition(window),menuButtonAdd))
 					{
 						StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 						if (staticObject != nullptr)
@@ -213,36 +151,36 @@ int main()
 
 						if (editMapName)
 						{
-							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonSubtract))
 							{
 								if ((door->getMapNum() - 1) != 0)
 								{
 									door->decreaseMapNum(1);
 								}
 							}
-							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonAdd))
 							{
 								door->increaseMapNum(1);
 							}
 						}
 						else if (editTileName)
 						{
-							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonSubtract))
 							{
 								door->decreaseTileName();
 							}
-							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonAdd))
 							{
 								door->increaseTileName();
 							}
 						}
 						else if (editOutDir)
 						{
-							if (sf::Mouse::getPosition(window).x >= editButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonSubtract.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonSubtract))
 							{
 								door->decreaseMapDir();
 							}
-							if (sf::Mouse::getPosition(window).x >= editButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= editButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= editButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= editButtonAdd.getPosition().y + 20)
+							if (clickedButton(sf::Mouse::getPosition(window), menuButtonAdd))
 							{
 								door->increaseMapDir();
 							}
@@ -265,30 +203,30 @@ int main()
 					if (pos != -1 && allEnemies[pos] != nullptr)
 					{
 						editingEnemy = true;
-						if (sf::Mouse::getPosition(window).x >= enemyButtonAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= enemyButtonAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= enemyButtonAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= enemyButtonAdd.getPosition().y + 20)
-						{
-							allEnemies[pos]->addCorner();
-						}
-						else if (sf::Mouse::getPosition(window).x >= enemyButtonSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= enemyButtonSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= enemyButtonSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= enemyButtonSubtract.getPosition().y + 20)
+						if (clickedButton(sf::Mouse::getPosition(window), menuButtonSubtract))
 						{
 							allEnemies[pos]->subtractCorner();
+						}
+						else if (clickedButton(sf::Mouse::getPosition(window), menuButtonAdd))
+						{
+							allEnemies[pos]->addCorner();
 						}
 
 					}
 				}
 				
-				if (sf::Mouse::getPosition(window).x >= mapNameAdd.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= mapNameAdd.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= mapNameAdd.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= mapNameAdd.getPosition().y + 20)
+				if (clickedButton(sf::Mouse::getPosition(window),mapNameAdd))
 				{
 					outputMapNr++;
 				}
-				else if (sf::Mouse::getPosition(window).x >= mapNameSubtract.getPosition().x - 20 && sf::Mouse::getPosition(window).x <= mapNameSubtract.getPosition().x + 20 && sf::Mouse::getPosition(window).y >= mapNameSubtract.getPosition().y - 20 && sf::Mouse::getPosition(window).y <= mapNameSubtract.getPosition().y + 20)
+				else if (clickedButton(sf::Mouse::getPosition(window), mapNameSubtract))
 				{
 					if (outputMapNr > 0)
 					{
 						outputMapNr--;
 					}
 				}
-				else if (sf::Mouse::getPosition(window).x >= saveMapButton.getPosition().x - 100 && sf::Mouse::getPosition(window).x <= saveMapButton.getPosition().x + 100 && sf::Mouse::getPosition(window).y >= saveMapButton.getPosition().y - 35 && sf::Mouse::getPosition(window).y <= saveMapButton.getPosition().y + 35)
+				else if (clickedButton(sf::Mouse::getPosition(window), saveMapButton))
 				{
 					saveMap();
 				}
@@ -297,7 +235,7 @@ int main()
 			{
 				int x = round(sf::Mouse::getPosition(window).x / 80);
 				int y = round(sf::Mouse::getPosition(window).y / 80);
-				if (x < 16 && y < 12)
+				if (x < 16 && y < 12 && x >= 0 && y >= 0)
 				{
 					Tile* oldTile = allTiles[y * 16 + x];
 					if (markedTile == oldTile)
@@ -309,13 +247,14 @@ int main()
 					temp.setOutlineColor(sf::Color::Magenta);
 					temp.setTexture(allTextures[8]);
 					allTiles[y * 16 + x] = new DoorTile(temp);
+					delete oldTile;
 				}
 			}
 			else if (event.type == sf::Event::KeyPressed && event.mouseButton.button == sf::Keyboard::S)
 			{
 				int x = round(sf::Mouse::getPosition(window).x / 80);
 				int y = round(sf::Mouse::getPosition(window).y / 80);
-				if (x < 16 && y < 12)
+				if (x < 16 && y < 12 && x >= 0 && y >= 0)
 				{
 					Tile* oldTile = allTiles[y * 16 + x];
 					if (markedTile == oldTile)
@@ -327,15 +266,19 @@ int main()
 					temp.setOutlineColor(sf::Color::Magenta);
 					temp.setTexture(allTextures[0]);
 					allTiles[y * 16 + x] = new StaticObject(temp,0);
+					delete oldTile;
 				}
 			}
 			else if (event.type == sf::Event::KeyPressed && event.mouseButton.button == sf::Keyboard::A)
 			{
 				int x = round(sf::Mouse::getPosition(window).x / 80);
 				int y = round(sf::Mouse::getPosition(window).y / 80);
-				if (x < 16 && y < 12)
+				std::cout << x << std::endl;
+
+				if (x < 16 && y < 12 && x >= 0 && y >= 0)
 				{
 					Tile* oldTile = allTiles[y * 16 + x];
+					Enemy* oldEnemy = allEnemies[y * 16 + x];
 					if (markedTile == oldTile)
 					{
 						markedTile = nullptr;
@@ -352,6 +295,8 @@ int main()
 					shape.setPosition(x * 80+40, y * 80+40);
 					shape.setFillColor(sf::Color::Red);
 					allEnemies[y * 16 + x] = new Enemy(shape, 3);
+					delete oldTile;
+					delete oldEnemy;
 				}
 			}
 			else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete)
@@ -388,8 +333,6 @@ int main()
 				}
 			}
 		}
-
-		update(window);
 
 		window.clear();
 
@@ -443,15 +386,76 @@ int main()
 		window.display();
 	}
 
+	freememory();
+
 	return 0;
 }
 
-void update(sf::RenderWindow &window)
+void setupMenu()
 {
-	if (markedTile != nullptr)
+	//FONT AND TEXT
+	if (!font.loadFromFile("font.ttf"))
 	{
-		DoorTile* door = dynamic_cast<DoorTile*>(markedTile);
+		std::cout << "ERROR LOADING FONT" << std::endl;
 	}
+	tileText.setFont(font);
+	tileText.setFillColor(sf::Color::Green);
+	tileText.setCharacterSize(24);
+
+	tileTextRed = tileText;
+	tileTextRed.setFillColor(sf::Color::Red);
+
+	//Loading texture for buttons
+	plusTexture = new sf::Texture;
+	plusTexture->loadFromFile("textures/plus.png");
+	minusTexture = new sf::Texture;
+	minusTexture->loadFromFile("textures/minus.png");
+	saveMapTexture = new sf::Texture;
+	saveMapTexture->loadFromFile("textures/saveMap.png");
+
+	//Creating background for menu
+	menuBackGround = sf::RectangleShape(sf::Vector2f(220, 940));
+	menuBackGround.setFillColor(sf::Color(90, 90, 90));
+	menuBackGround.setPosition(1290, 10);
+
+	//Setup all buttons
+	menuButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
+	menuButtonAdd.setOrigin(20, 20);
+	menuButtonAdd.setTexture(plusTexture);
+	menuButtonAdd.setOutlineColor(sf::Color::Black);
+	menuButtonAdd.setOutlineThickness(2);
+	menuButtonSubtract = menuButtonAdd;
+	menuButtonSubtract.setTexture(minusTexture);
+
+	/*editButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
+	editButtonAdd.setOrigin(20, 20);
+	editButtonAdd.setTexture(plusTexture);
+	editButtonAdd.setOutlineColor(sf::Color::Black);
+	editButtonAdd.setOutlineThickness(2);
+	editButtonSubtract = editButtonAdd;
+	editButtonSubtract.setTexture(minusTexture);
+
+	enemyButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
+	enemyButtonAdd.setOrigin(20, 20);
+	enemyButtonAdd.setTexture(plusTexture);
+	enemyButtonAdd.setOutlineColor(sf::Color::Black);
+	enemyButtonAdd.setOutlineThickness(2);
+	enemyButtonSubtract = editButtonAdd;
+	enemyButtonSubtract.setTexture(minusTexture);*/
+
+	mapNameAdd = sf::RectangleShape(sf::Vector2f(40, 40));
+	mapNameAdd.setOrigin(20, 20);
+	mapNameAdd.setTexture(plusTexture);
+	mapNameAdd.setOutlineColor(sf::Color::Black);
+	mapNameAdd.setOutlineThickness(2);
+	mapNameSubtract = mapNameAdd;
+	mapNameSubtract.setTexture(minusTexture);
+
+	saveMapButton = sf::RectangleShape(sf::Vector2f(200, 70));
+	saveMapButton.setOrigin(100, 35);
+	saveMapButton.setTexture(saveMapTexture);
+	saveMapButton.setOutlineColor(sf::Color::Black);
+	saveMapButton.setOutlineThickness(2);
 }
 
 void menuDrawing(sf::RenderWindow &window)
@@ -462,75 +466,49 @@ void menuDrawing(sf::RenderWindow &window)
 		StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 		if (door != nullptr)
 		{
-			setCenteredText("Door", tileText);
-			tileText.setPosition(1400, 30);
-			window.draw(tileText);
-			setCenteredText("Tile name:", tileText);
-			tileText.setPosition(1400, 200);
-			window.draw(tileText);
+			drawTextAt("Door", tileText, 1400, 30, window);
+			drawTextAt("Tile name:", tileText, 1400, 200, window);
 			if (!editTileName)
 			{
-				setCenteredText(door->getTileName(), tileText);
-				tileText.setPosition(1400, 250);
-				window.draw(tileText);
+				drawTextAt(door->getTileName(), tileText, 1400, 250,window);
 			}
 			else if(editTileName)
 			{
-				setCenteredText(door->getTileName(), tileTextRed);
-				tileTextRed.setPosition(1400, 250);
-				window.draw(tileTextRed);
+				drawTextAt(door->getTileName(), tileTextRed, 1400, 250, window);
 			}
-			setCenteredText("Map name:", tileText);
-			tileText.setPosition(1400, 300);
-			window.draw(tileText);
+			drawTextAt("Map name:", tileText, 1400, 300, window);
 			if (!editMapName)
 			{
-				setCenteredText(door->getMapName(), tileText);
-				tileText.setPosition(1400, 350);
-				window.draw(tileText);
+				drawTextAt(door->getMapName(), tileText, 1400, 350, window);
 			}
 			else if (editMapName)
 			{
-				setCenteredText(door->getMapName(), tileTextRed);
-				tileTextRed.setPosition(1400, 350);
-				window.draw(tileTextRed);
+				drawTextAt(door->getMapName(), tileTextRed, 1400, 350, window);
 			}
-			setCenteredText("Out direction:", tileText);
-			tileText.setPosition(1400, 400);
-			window.draw(tileText);
+			drawTextAt("Out direction:", tileText, 1400, 400,window);
 			if (!editOutDir)
 			{
-				setCenteredText(door->getOutDirection(), tileText);
-				tileText.setPosition(1400, 450);
-				window.draw(tileText);
+				drawTextAt(door->getOutDirection(), tileText, 1400, 450, window);
 			}
 			else if (editOutDir)
 			{
-				setCenteredText(door->getOutDirection(), tileTextRed);
-				tileTextRed.setPosition(1400, 450);
-				window.draw(tileTextRed);
+				drawTextAt(door->getOutDirection(), tileTextRed, 1400, 450, window);
 			}
 			if (editMapName || editOutDir || editTileName)
 			{
-				editButtonSubtract.setPosition(1350, 500);
-				window.draw(editButtonSubtract);
-				editButtonAdd.setPosition(1450, 500);
-				window.draw(editButtonAdd);
+				menuButtonSubtract.setPosition(1350, 500);
+				window.draw(menuButtonSubtract);
+				menuButtonAdd.setPosition(1450, 500);
+				window.draw(menuButtonAdd);
 			}
 		}
 		else if (staticObject != nullptr)
 		{
 			if (!editingEnemy)
 			{
-				setCenteredText("Static Object", tileText);
-				tileText.setPosition(1400, 30);
-				window.draw(tileText);
-				setCenteredText("Tile number:", tileText);
-				tileText.setPosition(1400, 200);
-				window.draw(tileText);
-				setCenteredText(std::to_string(staticObject->getTileNumber()), tileText);
-				tileText.setPosition(1400, 250);
-				window.draw(tileText);
+				drawTextAt("Static Object", tileText, 1400, 30, window);
+				drawTextAt("Tile number:", tileText, 1400, 200, window);
+				drawTextAt(std::to_string(staticObject->getTileNumber()), tileText, 1400, 250, window);
 				menuButtonSubtract.setPosition(1350, 250);
 				window.draw(menuButtonSubtract);
 				menuButtonAdd.setPosition(1450, 250);
@@ -538,34 +516,26 @@ void menuDrawing(sf::RenderWindow &window)
 			}
 			if (editingEnemy)
 			{
-				setCenteredText("Enemy Type", tileText);
-				tileText.setPosition(1400, 30);
-				window.draw(tileText);
-				enemyButtonSubtract.setPosition(1350, 300);
-				window.draw(enemyButtonSubtract);
-				enemyButtonAdd.setPosition(1450, 300);
-				window.draw(enemyButtonAdd);
+				drawTextAt("Enemy Type", tileText, 1400, 30, window);
+				menuButtonSubtract.setPosition(1350, 300);
+				window.draw(menuButtonSubtract);
+				menuButtonAdd.setPosition(1450, 300);
+				window.draw(menuButtonAdd);
 			}
 		}
 		else
 		{
-			setCenteredText("Nothing", tileText);
-			tileText.setPosition(1400, 30);
-			window.draw(tileText);
+			drawTextAt("Nothing", tileText, 1400, 30, window);
 		}
 	}
 	else
 	{
-		setCenteredText("Nothing Marked", tileText);
-		tileText.setPosition(1400, 30);
-		window.draw(tileText);
+		drawTextAt("Nothing Marked", tileText, 1400, 30, window);
 	}
-	setCenteredText("Map Name", tileText);
-	tileText.setPosition(1400, 700);
-	window.draw(tileText);
-	setCenteredText("map" + std::to_string(outputMapNr), tileText);
-	tileText.setPosition(1400, 750);
-	window.draw(tileText);
+	
+	//Save infomation
+	drawTextAt("Map Name", tileText, 1400, 700, window);
+	drawTextAt("map" + std::to_string(outputMapNr), tileText, 1400, 750, window);
 	mapNameAdd.setPosition(1450, 800);
 	mapNameSubtract.setPosition(1350, 800);
 	window.draw(mapNameAdd);
@@ -574,20 +544,33 @@ void menuDrawing(sf::RenderWindow &window)
 	window.draw(saveMapButton);
 }
 
-void setCenteredText(std::string text, sf::Text &tileTexture)
+void drawTextAt(std::string text, sf::Text &textObject, int xPos, int yPos, sf::RenderWindow &window)
 {
-		tileTexture.setString(text);
-		sf::FloatRect textRect = tileTexture.getLocalBounds();
-		tileTexture.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+		textObject.setString(text);
+		sf::FloatRect textRect = textObject.getLocalBounds();
+		textObject.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+		textObject.setPosition(xPos, yPos);
+		window.draw(textObject);
+}
+
+bool clickedButton(sf::Vector2i mousePos, sf::RectangleShape button)
+{
+	int halfWidth = button.getSize().x / 2;
+	int halfHeight = button.getSize().x / 2;
+	return mousePos.x >= button.getPosition().x - halfWidth &&
+		mousePos.x <= button.getPosition().x + halfWidth &&
+		mousePos.y >= button.getPosition().y - halfHeight &&
+		mousePos.y <= button.getPosition().y + halfHeight;
 }
 
 void saveMap()
 {
-	std::cout << "SAVING MAP" << std::endl;
+	//Open file with mapname
 	std::ofstream outFile;
 	outFile.open("map" + std::to_string(outputMapNr) + ".txt");
+	
+	//Find all out tilenames
 	std::vector<DoorTile*> usedTileNames;
-
 	for (int i = 0; i < allTiles.size(); i++)
 	{
 		DoorTile* door = dynamic_cast<DoorTile*>(allTiles[i]);
@@ -608,13 +591,16 @@ void saveMap()
 		}
 	}
 
+	//Write how many doortypes are in the map
 	outFile << usedTileNames.size() << std::endl;
 
+	//Write doortiles information to file
 	for (int i = 0; i < usedTileNames.size(); i++)
 	{
 		outFile << usedTileNames[i]->getTileName() << " " << usedTileNames[i]->getMapName() << " " << usedTileNames[i]->getOutDirection() << std::endl;
 	}
 
+	//Write all tiles to file
 	for (int y = 0; y < 12; y++)
 	{
 		for (int x = 0; x < 16; x++)
@@ -625,6 +611,7 @@ void saveMap()
 	}
 	outFile << std::endl;
 
+	//Write all enemies to file
 	for (int y = 0; y < 12; y++)
 	{
 		for (int x = 0; x < 16; x++)
@@ -642,4 +629,23 @@ void saveMap()
 	}
 
 	outFile.close();
+}
+
+void freememory()
+{
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		delete allEnemies[i];
+	}
+	for (int i = 0; i < allTiles.size(); i++)
+	{
+		delete allTiles[i];
+	}
+	for (int i = 0; i < allTextures.size(); i++)
+	{
+		delete allTextures[i];
+	}
+	delete minusTexture;
+	delete plusTexture;
+	delete saveMapTexture;
 }
