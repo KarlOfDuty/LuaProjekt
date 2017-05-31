@@ -8,15 +8,27 @@ class DoorTile : public Tile
 private:
 	std::string tileName;
 	std::string mapName;
+	int mapNum;
 	std::string outDirection;
+	std::vector<std::string> allOutDirections;
+	std::vector<std::string> allTileNames;
 public:
 	DoorTile(sf::RectangleShape tileShape);
 	void setTileName(std::string tileName);
-	void setMapName(std::string mapName);
-	void setOutDirection(std::string outDirection);
+	void increaseMapNum(int mapNum);
+	void decreaseMapNum(int mapNum);
+	void setMapName();
+	void increaseMapDir();
+	void decreaseMapDir();
+	int getCurrentDir();
+	void increaseTileName();
+	void decreaseTileName();
+	int getCurrentTileName();
 	std::string getTileName();
+	int getMapNum();
 	std::string getMapName();
 	std::string getOutDirection();
+	std::string getTileOutput();
 };
 
 #endif
