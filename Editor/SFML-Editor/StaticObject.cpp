@@ -37,3 +37,8 @@ void StaticObject::subtractNumber(std::vector<sf::Texture*> allTextures)
 		shape.setTexture(allTextures[tileNumber]);
 	}
 }
+
+std::string StaticObject::getTileOutput()
+{
+	return std::to_string(tileNumber);
+}

@@ -89,7 +89,7 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 			}
 			catch(std::invalid_argument& e)
 			{
-				tileNumber = 2;
+				tileNumber = 8;
 			}
 
 			// find its position in the tileset texture
@@ -116,7 +116,7 @@ bool Tile::loadMap(const std::string& tileset, sf::Vector2u tileSize, std::strin
 			{
 				allStaticObjects.push_back(new StaticObject(sf::Vector2f(quad[0].position)));
 			}
-			if (tileNumber == 2)
+			if (tileNumber == 8)
 			{
 				for (int k = 0; k < allDoorInfo.size(); k++)
 				{

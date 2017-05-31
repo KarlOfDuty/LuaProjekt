@@ -14,6 +14,7 @@ public:
 	int getTileNumber();
 	void addNumber(std::vector<sf::Texture*> allTextures);
 	void subtractNumber(std::vector<sf::Texture*> allTextures);
+	std::string getTileOutput();
 };
 
 #endif // !STATICOBJECT_H

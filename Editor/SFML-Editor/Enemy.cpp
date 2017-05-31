@@ -25,3 +25,30 @@ sf::CircleShape Enemy::getShape()
 {
 	return this->shape;
 }
+
+void Enemy::addCorner()
+{
+	if (amountOfCorners < 10)
+	{
+		amountOfCorners++;
+		sf::CircleShape newShape(10 * amountOfCorners, amountOfCorners);
+		newShape.setOrigin(10 * amountOfCorners, 10 * amountOfCorners);
+		newShape.rotate(45);
+		newShape.setPosition(shape.getPosition());
+		newShape.setFillColor(sf::Color::Red);
+		shape = newShape;
+	}
+}
+void Enemy::subtractCorner()
+{
+	if (amountOfCorners > 3)
+	{
+		amountOfCorners--;
+		sf::CircleShape newShape(10 * amountOfCorners, amountOfCorners);
+		newShape.setOrigin(10 * amountOfCorners, 10 * amountOfCorners);
+		newShape.rotate(45);
+		newShape.setPosition(shape.getPosition());
+		newShape.setFillColor(sf::Color::Red);
+		shape = newShape;
+	}
+}

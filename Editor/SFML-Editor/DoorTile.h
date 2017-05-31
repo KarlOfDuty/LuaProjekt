@@ -28,6 +28,7 @@ public:
 	int getMapNum();
 	std::string getMapName();
 	std::string getOutDirection();
+	std::string getTileOutput();
 };
 
 #endif

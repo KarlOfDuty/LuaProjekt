@@ -14,6 +14,8 @@ public:
 	~Enemy();
 	int getAmountOfCorners();
 	sf::CircleShape getShape();
+	void addCorner();
+	void subtractCorner();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const
 	{
 		target.draw(shape);

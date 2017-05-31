@@ -117,3 +117,8 @@ std::string DoorTile::getOutDirection()
 {
 	return outDirection;
 }
+
+std::string DoorTile::getTileOutput()
+{
+	return tileName;
+}

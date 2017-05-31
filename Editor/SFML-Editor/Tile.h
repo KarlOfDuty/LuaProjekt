@@ -15,6 +15,7 @@ public:
 	{
 		target.draw(shape);
 	}
+	virtual std::string getTileOutput() = 0;
 };
 
 #endif
