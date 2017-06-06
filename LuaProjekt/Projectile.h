@@ -1,6 +1,6 @@
 #ifndef PROJECTILE_H
 #define PROJECTILE_H
-#include <SFML\Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Collision.h"
 #include "StaticObject.h"

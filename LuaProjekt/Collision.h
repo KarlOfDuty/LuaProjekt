@@ -6,8 +6,11 @@
 namespace collision
 {
     bool collides(sf::CircleShape shape1, sf::CircleShape shape2, sf::Vector2f &mtv);
+    bool collides(sf::CircleShape shape1, sf::CircleShape shape2);
 	bool collides(sf::RectangleShape shape1, sf::CircleShape shape2, sf::Vector2f &mtv);
+    bool collides(sf::RectangleShape shape1, sf::CircleShape shape2);
 	bool collides(sf::RectangleShape shape1, sf::RectangleShape shape2, sf::Vector2f &mtv);
+    bool collides(sf::RectangleShape shape1, sf::RectangleShape shape2);
 	std::vector<sf::Vector2f> getPoints(sf::RectangleShape shape);
 	std::vector<sf::Vector2f> getPoints(sf::CircleShape shape);
     std::vector<sf::Vector2f> getAxis(std::vector<sf::Vector2f> allPoints);
