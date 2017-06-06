@@ -30,7 +30,9 @@ private:
 	std::vector<Projectile> allProjectiles;
 	Player* player;
 
-	static int functionWrapper(lua_State* L);
+	static int movementWrapper(lua_State* L);
+	static int worldCollisionWrapper(lua_State* L);
+	static int projectileCollisionWrapper(lua_State* L);
 
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
@@ -44,7 +46,7 @@ public:
 	void rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	int worldCollision();
-	int projectilesCollision(int index);
+	int projectileCollision(int index);
 	void move(float x, float y);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };

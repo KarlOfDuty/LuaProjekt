@@ -66,12 +66,16 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 {
 	this->allStaticObjects = allStaticObjects;
 	this->player = player;
+	for (int i = 0; i < allProjectiles.size(); i++)
+	{
+		allProjectiles[i].update(dt);
+	}
 
 	timeSinceLastShot += dt;
 	if (alive)
 	{
 		lua_pushlightuserdata(L, this);
-		lua_pushcclosure(L, Enemy::functionWrapper, 1);
+		lua_pushcclosure(L, Enemy::movementWrapper, 1);
 		lua_setglobal(L, "move");
 		//Movement
 		lua_getglobal(L, "enemyMovement");
@@ -147,16 +151,18 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 			rangedAttack(velocity*dt, damage, size, player);
 		}
 
-		worldCollision();
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::worldCollisionWrapper, 1);
+		lua_setglobal(L, "worldCollision");
+		lua_getglobal(L, "collisionWithWorld");
+		lua_call(L, 0, 0);
 
-		for (int i = 0; i < allProjectiles.size(); i++)
-		{
-			allProjectiles[i].update(dt);
-		}
-		for (size_t i = 0; i < allProjectiles.size(); i++)
-		{
-			projectilesCollision(i);
-		}
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::projectileCollisionWrapper, 1);
+		lua_setglobal(L, "projectileCollision");
+		lua_getglobal(L, "allProjectilesCollision");
+		lua_pushnumber(L, allProjectiles.size());
+		lua_call(L, 1, 0);
 	}
 }
 
@@ -190,7 +196,7 @@ int Enemy::worldCollision()
 	return 2;
 }
 
-int Enemy::projectilesCollision(int index)
+int Enemy::projectileCollision(int index)
 {
 	//Collision projectiles
 	std::vector<StaticObject*> closeObjectsProjectiles;
@@ -209,7 +215,7 @@ int Enemy::projectilesCollision(int index)
 		{
 			allProjectiles.erase(allProjectiles.begin() + index);
 			j = closeObjectsProjectiles.size();
-			return 3;
+			return 0;
 		}
 	}
 
@@ -220,7 +226,7 @@ int Enemy::projectilesCollision(int index)
 		allProjectiles[index].getShape().getPosition().y > 960)
 	{
 		allProjectiles.erase(allProjectiles.begin() + index);
-		return 3;
+		return 0;
 	}
 	//Check if colliding with player
 	if (collision::collides(allProjectiles[index].getShape(), player->getShape()))
@@ -228,7 +234,7 @@ int Enemy::projectilesCollision(int index)
 		player->applyDamage(damage);
 		allProjectiles.erase(allProjectiles.begin() + index);
 	}
-	return 3;
+	return 0;
 }
 
 void Enemy::move(float x, float y)
@@ -240,7 +246,7 @@ void Enemy::move(float x, float y)
 	shape.setPosition(shape.getPosition() + dir);
 }
 
-int Enemy::functionWrapper(lua_State * L)
+int Enemy::movementWrapper(lua_State * L)
 {
 	Enemy* c = static_cast<Enemy*>(
 		lua_touserdata(L, lua_upvalueindex(1)));
@@ -252,6 +258,24 @@ int Enemy::functionWrapper(lua_State * L)
 	lua_pop(L, 1);
 
 	c->move(dir.x, dir.y);
+	return 0;
+}
+int Enemy::worldCollisionWrapper(lua_State * L)
+{
+	Enemy* c = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+
+	c->worldCollision();
+	return 0;
+}
+int Enemy::projectileCollisionWrapper(lua_State * L)
+{
+	Enemy* c = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+
+	int index = (int)lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	c->projectileCollision(index);
 	return 0;
 }
 void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const

@@ -55,3 +55,12 @@ function enemyMovement( pos, playerPos, size, dt )
 	move(y, x);
 end
 
+function collisionWithWorld()
+	worldCollision();
+end
+
+function allProjectilesCollision(amountOfProjectiles)
+	for i=0,amountOfProjectiles do
+		projectileCollision(i);
+	end
+end
