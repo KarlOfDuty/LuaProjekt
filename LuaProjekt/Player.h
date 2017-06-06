@@ -1,6 +1,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
-#include <SFML\Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Collision.h"
 #include "StaticObject.h"
@@ -27,7 +27,7 @@ private:
 	std::vector<sf::RectangleShape> debugPoints;
 	std::vector<Projectile> allProjectiles;
 	sf::Clock invincibilityClock;
-	
+
 	sf::Font healthFont;
 	sf::Text healthText;
 public:
@@ -43,4 +43,3 @@ public:
 };
 
 #endif
-

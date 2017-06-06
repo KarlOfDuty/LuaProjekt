@@ -178,7 +178,6 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 
 	//Update Attackbox position
 	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(35 * direction.x, 35 * direction.y));
-	
 	//Player collision with static objects
 	std::vector<StaticObject*> closeObjects;
 	for (int i = 0; i < allStaticObjects.size(); i++)
@@ -198,7 +197,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			playerShape.setPosition(playerShape.getPosition() - mtv);
 		}
 	}
-	
+
 	//Collision projectiles
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
@@ -215,7 +214,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 		}
 		for (int j = 0; j < closeObjectsProjectiles.size(); j++)
 		{
-			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape(), sf::Vector2f()))
+			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape()))
 			{
 				allProjectiles.erase(allProjectiles.begin() + i);
 				j = closeObjectsProjectiles.size();
@@ -240,7 +239,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 	{
 		for (int j = 0; j < allEnemies.size(); j++)
 		{
-			if (allEnemies[j]->isAlive() && collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape(), sf::Vector2f()))
+			if (allEnemies[j]->isAlive() && collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape()))
 			{
 				allEnemies[j]->applyDamage(projectileDamage);
 				allProjectiles.erase(allProjectiles.begin() + i);

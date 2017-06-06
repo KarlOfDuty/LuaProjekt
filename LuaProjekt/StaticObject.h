@@ -1,7 +1,7 @@
 #ifndef STATICOBJECT_H
 #define STATICOBJECT_H
 
-#include <SFML\Graphics.hpp>
+#include <SFML/Graphics.hpp>
 
 class StaticObject : public sf::Drawable
 {

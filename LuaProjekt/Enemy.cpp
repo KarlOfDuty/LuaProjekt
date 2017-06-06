@@ -64,13 +64,15 @@ void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size, Player* pl
 }
 void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
 {
+	this->allStaticObjects = allStaticObjects;
+	this->player = player;
+
 	timeSinceLastShot += dt;
 	if (alive)
-	{	
+	{
 		lua_pushlightuserdata(L, this);
 		lua_pushcclosure(L, Enemy::functionWrapper, 1);
 		lua_setglobal(L, "move");
-
 		//Movement
 		lua_getglobal(L, "enemyMovement");
 
@@ -145,73 +147,90 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 			rangedAttack(velocity*dt, damage, size, player);
 		}
 
-		//Collision with static objects
-		std::vector<StaticObject*> closeObjects;
-		for (int i = 0; i < allStaticObjects.size(); i++)
-		{
-			sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
-			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-			if (length < 150)
-			{
-				closeObjects.push_back(allStaticObjects[i]);
-			}
-		}
-		for (int i = 0; i < closeObjects.size(); i++)
-		{
-			sf::Vector2f mtv;
-			if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
-			{
-				shape.setPosition(shape.getPosition() - mtv);
-			}
-		}
+		worldCollision();
 
-
-		//Collision for projectiles
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			allProjectiles[i].update(dt);
-			std::vector<StaticObject*> closeObjectsProjectiles;
-			for (int j = 0; j < allStaticObjects.size(); j++)
-			{
-				sf::Vector2f distanceVector = allProjectiles[i].getShape().getPosition() - allStaticObjects[j]->getCenterPos();
-				float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-				if (length < 110)
-				{
-					closeObjectsProjectiles.push_back(allStaticObjects[j]);
-				}
-			}
-			for (int j = 0; j < closeObjectsProjectiles.size(); j++)
-			{
-				if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape(), sf::Vector2f()))
-				{
-					allProjectiles.erase(allProjectiles.begin() + i);
-					j = closeObjectsProjectiles.size();
-				}
-			}
 		}
-
-		//Check if out of bounds
-		for (int i = 0; i < allProjectiles.size(); i++)
+		for (size_t i = 0; i < allProjectiles.size(); i++)
 		{
-			if (allProjectiles[i].getShape().getPosition().x < 0 ||
-				allProjectiles[i].getShape().getPosition().x > 1280 ||
-				allProjectiles[i].getShape().getPosition().y < 0 ||
-				allProjectiles[i].getShape().getPosition().y > 960)
-			{
-				allProjectiles.erase(allProjectiles.begin() + i);
-			}
-		}
-
-		for (int i = 0; i < allProjectiles.size(); i++)
-		{
-			if (collision::collides(allProjectiles[i].getShape(), player->getShape(), sf::Vector2f()))
-			{
-				player->applyDamage(damage);
-				allProjectiles.erase(allProjectiles.begin() + i);
-			}
+			projectilesCollision(i);
 		}
 	}
 }
+
+int Enemy::worldCollision()
+{
+	//Collision with static objects
+	float xMove = shape.getPosition().x;
+	float yMove = shape.getPosition().y;
+
+	std::vector<StaticObject*> closeObjects;
+	for (int i = 0; i < allStaticObjects.size(); i++)
+	{
+		sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 150)
+		{
+			closeObjects.push_back(allStaticObjects[i]);
+		}
+	}
+	for (int i = 0; i < closeObjects.size(); i++)
+	{
+		sf::Vector2f mtv;
+		if (collision::collides(closeObjects[i]->getShape(), shape, mtv))
+		{
+			xMove -= mtv.x;
+			yMove -= mtv.y;
+			//shape.setPosition(shape.getPosition() - mtv);
+		}
+	}
+	shape.setPosition(xMove, yMove);
+	return 2;
+}
+
+int Enemy::projectilesCollision(int index)
+{
+	//Collision projectiles
+	std::vector<StaticObject*> closeObjectsProjectiles;
+	for (int j = 0; j < allStaticObjects.size(); j++)
+	{
+		sf::Vector2f distanceVector = allProjectiles[index].getShape().getPosition() - allStaticObjects[j]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 110)
+		{
+			closeObjectsProjectiles.push_back(allStaticObjects[j]);
+		}
+	}
+	for (int j = 0; j < closeObjectsProjectiles.size(); j++)
+	{
+		if (collision::collides(allProjectiles[index].getShape(), closeObjectsProjectiles[j]->getShape()))
+		{
+			allProjectiles.erase(allProjectiles.begin() + index);
+			j = closeObjectsProjectiles.size();
+			return 3;
+		}
+	}
+
+	//Check if out of bounds
+	if (allProjectiles[index].getShape().getPosition().x < 0 ||
+		allProjectiles[index].getShape().getPosition().x > 1280 ||
+		allProjectiles[index].getShape().getPosition().y < 0 ||
+		allProjectiles[index].getShape().getPosition().y > 960)
+	{
+		allProjectiles.erase(allProjectiles.begin() + index);
+		return 3;
+	}
+	//Check if colliding with player
+	if (collision::collides(allProjectiles[index].getShape(), player->getShape()))
+	{
+		player->applyDamage(damage);
+		allProjectiles.erase(allProjectiles.begin() + index);
+	}
+	return 3;
+}
+
 void Enemy::move(float x, float y)
 {
 	sf::Vector2f dir;
@@ -240,7 +259,7 @@ void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const
 	if (alive)
 	{
 		target.draw(shape);
-		
+
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			target.draw(allProjectiles[i]);

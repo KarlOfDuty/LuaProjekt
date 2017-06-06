@@ -1,7 +1,7 @@
 #ifndef DOOR_H
 #define DOOR_H
 
-#include <SFML\Graphics.hpp>
+#include <SFML/Graphics.hpp>
 
 class Door : public sf::Drawable
 {
@@ -22,4 +22,3 @@ public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 #endif
-

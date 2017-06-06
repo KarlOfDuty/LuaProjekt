@@ -1,11 +1,10 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "Player.h"
-#include "collision.h"
+#include "Collision.h"
 #include "Tile.h"
 #include "Enemy.h"
 #include "StaticObject.h"
-#include <crtdbg.h>
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -25,8 +24,6 @@ void update();
 void reloadLua();
 int main()
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dofile(L,AIPath.c_str());
