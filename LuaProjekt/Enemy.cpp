@@ -154,6 +154,9 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			allProjectiles[i].update(dt);
+		}
+		for (size_t i = 0; i < allProjectiles.size(); i++)
+		{
 			projectilesCollision(i);
 		}
 	}
@@ -171,8 +174,6 @@ int Enemy::worldCollision()
 		sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
 		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
 		if (length < 150)
-		//Collision for projectiles
-		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			closeObjects.push_back(allStaticObjects[i]);
 		}
@@ -194,48 +195,42 @@ int Enemy::worldCollision()
 int Enemy::projectilesCollision(int index)
 {
 	//Collision projectiles
-	for (int i = 0; i < allProjectiles.size(); i++)
+	std::vector<StaticObject*> closeObjectsProjectiles;
+	for (int j = 0; j < allStaticObjects.size(); j++)
 	{
-		std::vector<StaticObject*> closeObjectsProjectiles;
-		for (int j = 0; j < allStaticObjects.size(); j++)
+		sf::Vector2f distanceVector = allProjectiles[index].getShape().getPosition() - allStaticObjects[j]->getCenterPos();
+		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
+		if (length < 110)
 		{
-			sf::Vector2f distanceVector = allProjectiles[i].getShape().getPosition() - allStaticObjects[j]->getCenterPos();
-			float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-			if (length < 110)
-			{
-				closeObjectsProjectiles.push_back(allStaticObjects[j]);
-			}
+			closeObjectsProjectiles.push_back(allStaticObjects[j]);
 		}
-		for (int j = 0; j < closeObjectsProjectiles.size(); j++)
+	}
+	for (int j = 0; j < closeObjectsProjectiles.size(); j++)
+	{
+		if (collision::collides(allProjectiles[index].getShape(), closeObjectsProjectiles[j]->getShape()))
 		{
-			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape()))
-			{
-				allProjectiles.erase(allProjectiles.begin() + i);
-				j = closeObjectsProjectiles.size();
-			}
+			allProjectiles.erase(allProjectiles.begin() + index);
+			j = closeObjectsProjectiles.size();
+			return 3;
 		}
 	}
 
 	//Check if out of bounds
-	for (int i = 0; i < allProjectiles.size(); i++)
+	if (allProjectiles[index].getShape().getPosition().x < 0 ||
+		allProjectiles[index].getShape().getPosition().x > 1280 ||
+		allProjectiles[index].getShape().getPosition().y < 0 ||
+		allProjectiles[index].getShape().getPosition().y > 960)
 	{
-		if (allProjectiles[i].getShape().getPosition().x < 0 ||
-			allProjectiles[i].getShape().getPosition().x > 1280 ||
-			allProjectiles[i].getShape().getPosition().y < 0 ||
-			allProjectiles[i].getShape().getPosition().y > 960)
-		{
-			allProjectiles.erase(allProjectiles.begin() + i);
-		}
+		allProjectiles.erase(allProjectiles.begin() + index);
+		return 3;
 	}
 	//Check if colliding with player
-	for (int i = 0; i < allProjectiles.size(); i++)
+	if (collision::collides(allProjectiles[index].getShape(), player->getShape()))
 	{
-		if (collision::collides(allProjectiles[i].getShape(), player->getShape()))
-		{
-			player->applyDamage(damage);
-			allProjectiles.erase(allProjectiles.begin() + i);
-		}
+		player->applyDamage(damage);
+		allProjectiles.erase(allProjectiles.begin() + index);
 	}
+	return 3;
 }
 
 void Enemy::move(sf::Vector2f dir)
