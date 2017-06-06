@@ -206,8 +206,7 @@ void Enemy::projectilesCollision()
 		}
 		for (int j = 0; j < closeObjectsProjectiles.size(); j++)
 		{
-			sf::Vector2f knas;
-			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape(), knas))
+			if (collision::collides(allProjectiles[i].getShape(), closeObjectsProjectiles[j]->getShape()))
 			{
 				allProjectiles.erase(allProjectiles.begin() + i);
 				j = closeObjectsProjectiles.size();
@@ -229,8 +228,7 @@ void Enemy::projectilesCollision()
 	//Check if colliding with player
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
-		sf::Vector2f knas;
-		if (collision::collides(allProjectiles[i].getShape(), player->getShape(), knas))
+		if (collision::collides(allProjectiles[i].getShape(), player->getShape()))
 		{
 			player->applyDamage(damage);
 			allProjectiles.erase(allProjectiles.begin() + i);
