@@ -70,6 +70,9 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	timeSinceLastShot += dt;
 	if (alive)
 	{
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::functionWrapper, 1);
+		lua_setglobal(L, "move");
 		//Movement
 		lua_getglobal(L, "enemyMovement");
 
@@ -93,14 +96,9 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 
 		lua_pushnumber(L, shape.getPointCount());
 
-		lua_call(L, 3, 2);
+		lua_pushnumber(L, dt);
 
-		sf::Vector2f dir;
-		dir.x = (float)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-		dir.y = (float)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-		move(dir*dt);
+		lua_call(L, 4, 0);
 
 		//Ranged attack
 		lua_getglobal(L, "rangedAttackAI");
@@ -233,9 +231,28 @@ int Enemy::projectilesCollision(int index)
 	return 3;
 }
 
-void Enemy::move(sf::Vector2f dir)
+void Enemy::move(float x, float y)
 {
+	sf::Vector2f dir;
+	dir.x = x;
+	dir.y = y;
+
 	shape.setPosition(shape.getPosition() + dir);
+}
+
+int Enemy::functionWrapper(lua_State * L)
+{
+	Enemy* c = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+
+	sf::Vector2f dir;
+	dir.x = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	dir.y = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	c->move(dir.x, dir.y);
+	return 0;
 }
 void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {
