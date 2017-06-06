@@ -59,8 +59,6 @@ function collisionWithWorld()
 	worldCollision();
 end
 
-function allProjectilesCollision(amountOfProjectiles)
-	for i=0,amountOfProjectiles do
-		projectileCollision(i);
-	end
+function allProjectilesCollision()
+	projectileCollision();
 end

@@ -45,8 +45,8 @@ public:
 	void applyDamage(int damageTaken);
 	void rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
-	int worldCollision();
-	int projectileCollision(int index);
+	void worldCollision();
+	void projectilesCollision();
 	void move(float x, float y);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
