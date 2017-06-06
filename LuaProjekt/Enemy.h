@@ -28,6 +28,8 @@ private:
 
 	std::vector<Projectile> allProjectiles;
 
+	static int functionWrapper(lua_State* L);
+
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
 	Enemy(int nr, sf::Vector2f pos);
@@ -39,7 +41,8 @@ public:
 	void applyDamage(int damageTaken);
 	void rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
-	void move(sf::Vector2f dir);
+	void move(float x, float y);
+	void hello();
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 

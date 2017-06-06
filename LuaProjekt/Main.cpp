@@ -28,6 +28,7 @@ int main()
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dofile(L,AIPath.c_str());
+
 	//Create the window
 	sf::ContextSettings settings;
 	settings.depthBits = 24;
