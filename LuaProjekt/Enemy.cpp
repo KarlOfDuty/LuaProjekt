@@ -68,7 +68,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	if (alive)
 	{	
 		//Movement
-		lua_getglobal(L, "movement");
+		lua_getglobal(L, "enemyMovement");
 
 		//This pos
 		lua_newtable(L);
@@ -100,7 +100,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		move(dir*dt);
 
 		//Ranged attack
-		lua_getglobal(L, "rangedAttack");
+		lua_getglobal(L, "rangedAttackAI");
 
 		//This pos
 		lua_newtable(L);
@@ -134,8 +134,8 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 			velocity.x = (float)lua_tonumber(L, -1);
 			lua_pop(L, 1);
 			velocity.y = (float)lua_tonumber(L, -1);
-
 			lua_pop(L, 1);
+
 			int damage = 0;
 			damage = (int)lua_tonumber(L, -1);
 			lua_pop(L, 1);
@@ -167,7 +167,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		}
 
 
-		//Collision projectiles
+		//Collision for projectiles
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			allProjectiles[i].update(dt);
@@ -211,27 +211,6 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 				allProjectiles.erase(allProjectiles.begin() + i);
 			}
 		}
-
-		//Collision with enemies
-
-		//std::vector<Enemy*> closeEnemies;
-		//for (int i = 0; i < enemies.size(); i++)
-		//{
-		//	sf::Vector2f distanceVector = shape.getPosition() - enemies[i]->getShape().getPosition();
-		//	float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
-		//	if (length < 150 && length > 0.001)
-		//	{
-		//		closeEnemies.push_back(enemies[i]);
-		//	}
-		//}
-		//for (int i = 0; i < closeEnemies.size(); i++)
-		//{
-		//	sf::Vector2f mtv;
-		//	if (collision::collides(closeEnemies[i]->getShape(), shape, mtv))
-		//	{
-		//		shape.setPosition(shape.getPosition() - mtv);
-		//	}
-		//}
 	}
 }
 void Enemy::move(sf::Vector2f dir)
