@@ -37,7 +37,7 @@ function shoot(direction,timeSinceLastShot)
 	end
 	speed = 50000;
 	size = 15;
-	damage = 100;
+	damage = 5;
 	normalize(direction);
 	x = direction["x"] * speed;
 	y = direction["y"] * speed;
@@ -52,7 +52,15 @@ function enemyMovement( pos, playerPos, size, dt )
 	normalize(vector);
 	x = vector["x"]*(speed/size)*dt;
 	y = vector["y"]*(speed/size)*dt;
-	move(y, x);
+	enemyMove(y, x);
+end
+
+function playerMovement(dir,dt)
+	normalize(dir);
+	movementSpeed = 500;
+	x = dir["x"] * movementSpeed*dt;
+	y = dir["y"] * movementSpeed*dt;
+	playerMove(y,x);
 end
 
 function collisionWithWorld()

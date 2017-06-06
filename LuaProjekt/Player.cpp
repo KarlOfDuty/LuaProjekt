@@ -14,7 +14,7 @@ Player::Player()
 	attackBox.setFillColor(sf::Color(50,50,200));
 	attackBox.setOrigin(10, 0);
 	attacking = false;
-	direction = sf::Vector2f(0, 1);
+	direction = sf::Vector2i(0, 1);
 
 	hp = 10;
 
@@ -28,6 +28,29 @@ Player::Player()
 Player::~Player()
 {
 
+}
+void Player::move(float x, float y)
+{
+	sf::Vector2f dir;
+	dir.x = x;
+	dir.y = y;
+
+	playerShape.setPosition(playerShape.getPosition() + dir);
+}
+
+int Player::movementWrapper(lua_State * L)
+{
+	Player* c = static_cast<Player*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+
+	sf::Vector2f dir;
+	dir.x = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	dir.y = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	c->move(dir.x, dir.y);
+	return 0;
 }
 sf::CircleShape Player::getShape()
 {
@@ -111,26 +134,27 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			}
 			stoppedAttacking = false;
 		}
+		sf::Vector2i movementVector;
 		//Controls
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		{
-			playerShape.setPosition(playerShape.getPosition().x - 300 * dt, playerShape.getPosition().y);
-			direction = sf::Vector2f(-1, 0);
+			direction = sf::Vector2i(-1, 0);
+			movementVector = movementVector + direction;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 		{
-			playerShape.setPosition(playerShape.getPosition().x + 300 * dt, playerShape.getPosition().y);
-			direction = sf::Vector2f(1, 0);
+			direction = sf::Vector2i(1, 0);
+			movementVector = movementVector + direction;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 		{
-			playerShape.setPosition(playerShape.getPosition().x, playerShape.getPosition().y - 300 * dt);
-			direction = sf::Vector2f(0, -1);
+			direction = sf::Vector2i(0, -1);
+			movementVector = movementVector + direction;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 		{
-			playerShape.setPosition(playerShape.getPosition().x, playerShape.getPosition().y + 300 * dt);
-			direction = sf::Vector2f(0, 1);
+			direction = sf::Vector2i(0, 1);
+			movementVector = movementVector + direction;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
@@ -149,6 +173,29 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			}
 			attackBoxRotation = 0;
 		}
+		if (movementVector != sf::Vector2i(0, 0))
+		{
+			lua_pushlightuserdata(L, this);
+			lua_pushcclosure(L, Player::movementWrapper, 1);
+			lua_setglobal(L, "playerMove");
+			//Movement
+			lua_getglobal(L, "playerMovement");
+
+			//Movement vector
+			lua_newtable(L);
+			lua_pushstring(L, "x");
+			lua_pushnumber(L, movementVector.x);
+			lua_settable(L, -3);
+			lua_pushstring(L, "y");
+			lua_pushnumber(L, movementVector.y);
+			lua_settable(L, -3);
+
+			lua_pushnumber(L, dt);
+
+			lua_call(L, 2, 2);
+		}
+
+
 	}
 	else
 	{
