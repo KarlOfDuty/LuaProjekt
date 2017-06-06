@@ -72,7 +72,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_setglobal(L, "move");
 
 		//Movement
-		lua_getglobal(L, "movement");
+		lua_getglobal(L, "enemyMovement");
 
 		//This pos
 		lua_newtable(L);
@@ -99,7 +99,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		lua_call(L, 4, 0);
 
 		//Ranged attack
-		lua_getglobal(L, "rangedAttack");
+		lua_getglobal(L, "rangedAttackAI");
 
 		//This pos
 		lua_newtable(L);
@@ -133,8 +133,8 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 			velocity.x = (float)lua_tonumber(L, -1);
 			lua_pop(L, 1);
 			velocity.y = (float)lua_tonumber(L, -1);
-
 			lua_pop(L, 1);
+
 			int damage = 0;
 			damage = (int)lua_tonumber(L, -1);
 			lua_pop(L, 1);
@@ -166,7 +166,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		}
 
 
-		//Collision projectiles
+		//Collision for projectiles
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			allProjectiles[i].update(dt);
