@@ -18,6 +18,8 @@ Player* player;
 Tile mapTile;
 lua_State* L;
 std::string AIPath = "AI.lua";
+bool paused = false;
+
 void update();
 void reloadLua();
 int main()
@@ -62,6 +64,10 @@ int main()
 			{
 				running = false;
 			}
+			else if (windowEvent.type == sf::Event::KeyPressed && windowEvent.key.code == sf::Keyboard::E)
+			{
+				paused = !paused;
+			}
 		}
 
 		update();
@@ -79,8 +85,11 @@ int main()
 void update()
 {
 	float dt = deltaTime.restart().asSeconds();
-	player->update(dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
-	mapTile.update(L, dt, player);
+	if (!paused)
+	{
+		player->update(L, dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
+		mapTile.update(L, dt, player);
+	}
 }
 
 void reloadLua()

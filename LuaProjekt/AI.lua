@@ -7,15 +7,15 @@ function normalize(vec)
 	vec["x"] = vec["x"] / l;
 	vec["y"] = vec["y"] / l;
 end
---Returns the projectile if fired
-function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
+--Ranged attack for AI
+function rangedAttackAI( pos, playerPos, timeSinceLastShot, corners )
 	--If the attack is still on cooldown, don't fire
 	if timeSinceLastShot < 0.4*corners then
 		return 0;
 	end
 	direction = {};
 	--Decrease speed for larger enemies
-	speed = 100000/corners;
+	speed = 50000/corners;
 	--Increase size for enemies with more corners
 	size = (corners^2)*1.1;
 	--Increase damage depending on size
@@ -27,10 +27,24 @@ function rangedAttack( pos, playerPos, timeSinceLastShot, corners )
 	--Multiply by the speed
 	x = direction["x"]*speed;
 	y = direction["y"]*speed;
+	--Returns the projectile
+	return size, damage, y, x, 1;
+end
+--Ranged attack for player
+function shoot(direction,timeSinceLastShot)
+	if timeSinceLastShot < 0.5 then
+		return 0;
+	end
+	speed = 50000;
+	size = 15;
+	damage = 100;
+	normalize(direction);
+	x = direction["x"] * speed;
+	y = direction["y"] * speed;
 	return size, damage, y, x, 1;
 end
 --Enemies always move towards the player
-function movement( pos, playerPos, size )
+function enemyMovement( pos, playerPos, size )
 	vector = {};
 	speed = 500;
 	vector["x"] = playerPos["x"] - pos["x"];

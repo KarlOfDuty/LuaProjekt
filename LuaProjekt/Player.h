@@ -5,6 +5,11 @@
 #include "Collision.h"
 #include "StaticObject.h"
 #include "Projectile.h"
+extern "C" {
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+}
 class Enemy;
 
 class Player : public sf::Drawable
@@ -17,6 +22,7 @@ private:
 	bool attacking;
 	int hp;
 	bool stoppedAttacking;
+	int projectileDamage;
 	sf::Clock shootDelay;
 	std::vector<sf::RectangleShape> debugPoints;
 	std::vector<Projectile> allProjectiles;
@@ -30,9 +36,9 @@ public:
 	sf::CircleShape getShape();
 	void resetHP();
 	void applyDamage(int damage);
-	void shoot();
+	void shoot(lua_State* L, float dt);
 	void setPos(sf::Vector2f newPos);
-	void update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
+	void update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 

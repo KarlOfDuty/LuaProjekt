@@ -49,21 +49,58 @@ void Player::applyDamage(int damage)
 		invincibilityClock.restart();
 	}
 }
-void Player::shoot()
+void Player::shoot(lua_State* L, float dt)
 {
-	if (shootDelay.getElapsedTime().asSeconds() >= 0.6)
+	//Ranged attack
+	lua_getglobal(L, "shoot");
+
+	//Shot direction
+	lua_newtable(L);
+	lua_pushstring(L, "x");
+	lua_pushnumber(L, direction.x);
+	lua_settable(L, -3);
+	lua_pushstring(L, "y");
+	lua_pushnumber(L, direction.y);
+	lua_settable(L, -3);
+
+	//Shot delay
+	lua_pushnumber(L, shootDelay.getElapsedTime().asSeconds());
+
+	lua_call(L, 2, 5);
+
+	bool shoot = true;
+	shoot = (int)lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	if (shoot)
 	{
-		allProjectiles.push_back(Projectile(playerShape.getPosition(), direction*900.0f, 15));
+		sf::Vector2f velocity;
+		velocity.x = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		velocity.y = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+
+		int damage = 0;
+		damage = (int)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+
+		int size = 0;
+		size = (int)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+
+		projectileDamage = damage;
+		allProjectiles.push_back(Projectile(playerShape.getPosition(), velocity*dt, size));
 		shootDelay.restart();
 	}
+
 }
 void Player::setPos(sf::Vector2f newPos)
 {
 	this->playerShape.setPosition(newPos);
 }
-void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
+void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
 	healthText.setString(std::to_string(hp));
+	//Prevent moving and using other attacks while attacking
 	if (!attacking)
 	{
 		if (stoppedAttacking)
@@ -97,7 +134,7 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
-			shoot();
+			shoot(L,dt);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
@@ -141,19 +178,6 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 
 	//Update Attackbox position
 	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(35 * direction.x, 35 * direction.y));
-
-	//Player collision with enemies
-	for (int i = 0; i < allEnemies.size(); i++)
-	{
-		sf::Vector2f mtv;
-		if (allEnemies[i]->isAlive())
-		{
-			if (collision::collides(playerShape, allEnemies[i]->getShape(), mtv))
-			{
-				//playerShape.setPosition(playerShape.getPosition() + mtv);
-			}
-		}
-	}
 	//Player collision with static objects
 	std::vector<StaticObject*> closeObjects;
 	for (int i = 0; i < allStaticObjects.size(); i++)
@@ -210,14 +234,14 @@ void Player::update(float dt, std::vector<Enemy*> &allEnemies, std::vector<Stati
 		}
 	}
 
-	//Collision with enemies
+	//Projectile collision with enemies
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
 		for (int j = 0; j < allEnemies.size(); j++)
 		{
 			if (allEnemies[j]->isAlive() && collision::collides(allProjectiles[i].getShape(), allEnemies[j]->getShape()))
 			{
-				allEnemies[j]->applyDamage(5);
+				allEnemies[j]->applyDamage(projectileDamage);
 				allProjectiles.erase(allProjectiles.begin() + i);
 				j = allEnemies.size();
 			}

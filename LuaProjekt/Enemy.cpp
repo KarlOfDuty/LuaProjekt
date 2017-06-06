@@ -71,7 +71,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	if (alive)
 	{
 		//Movement
-		lua_getglobal(L, "movement");
+		lua_getglobal(L, "enemyMovement");
 
 		//This pos
 		lua_newtable(L);
@@ -103,7 +103,7 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		move(dir*dt);
 
 		//Ranged attack
-		lua_getglobal(L, "rangedAttack");
+		lua_getglobal(L, "rangedAttackAI");
 
 		//This pos
 		lua_newtable(L);
@@ -137,8 +137,8 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 			velocity.x = (float)lua_tonumber(L, -1);
 			lua_pop(L, 1);
 			velocity.y = (float)lua_tonumber(L, -1);
-
 			lua_pop(L, 1);
+
 			int damage = 0;
 			damage = (int)lua_tonumber(L, -1);
 			lua_pop(L, 1);
@@ -154,8 +154,8 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			allProjectiles[i].update(dt);
+			projectilesCollision(i);
 		}
-		projectilesCollision();
 	}
 }
 
@@ -171,6 +171,8 @@ int Enemy::worldCollision()
 		sf::Vector2f distanceVector = shape.getPosition() - allStaticObjects[i]->getCenterPos();
 		float length = sqrt(pow(distanceVector.x, 2) + pow(distanceVector.y, 2));
 		if (length < 150)
+		//Collision for projectiles
+		for (int i = 0; i < allProjectiles.size(); i++)
 		{
 			closeObjects.push_back(allStaticObjects[i]);
 		}
@@ -189,7 +191,7 @@ int Enemy::worldCollision()
 	return 2;
 }
 
-void Enemy::projectilesCollision()
+int Enemy::projectilesCollision(int index)
 {
 	//Collision projectiles
 	for (int i = 0; i < allProjectiles.size(); i++)

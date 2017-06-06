@@ -43,7 +43,7 @@ public:
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	void move(sf::Vector2f dir);
 	int worldCollision();
-	void projectilesCollision();
+	int projectilesCollision(int index);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
 
