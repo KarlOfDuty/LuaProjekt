@@ -44,13 +44,14 @@ function shoot(direction,timeSinceLastShot)
 	return size, damage, y, x, 1;
 end
 --Enemies always move towards the player
-function enemyMovement( pos, playerPos, size )
+function enemyMovement( pos, playerPos, size, dt )
 	vector = {};
 	speed = 500;
 	vector["x"] = playerPos["x"] - pos["x"];
 	vector["y"] = playerPos["y"] - pos["y"];
 	normalize(vector);
-	x = vector["x"]*speed/size;
-	y = vector["y"]*speed/size;
-	return y, x;
+	x = vector["x"]*(speed/size)*dt;
+	y = vector["y"]*(speed/size)*dt;
+	move(y, x);
 end
+
