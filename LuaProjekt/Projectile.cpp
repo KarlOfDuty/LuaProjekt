@@ -2,6 +2,7 @@
 
 Projectile::Projectile(sf::Vector2f pos, sf::Vector2f velocity, int size)
 {
+	projectile.setOrigin(size/2,size/2);
 	projectile.setSize(sf::Vector2f(size, size));
 	projectile.setPosition(pos);
 	projectile.setFillColor(sf::Color::Blue);

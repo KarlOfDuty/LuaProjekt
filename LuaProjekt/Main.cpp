@@ -16,7 +16,10 @@ sf::Clock deltaTime;
 
 Player* player;
 Tile mapTile;
+
+lua_State* playerState;
 lua_State* L;
+
 std::string AIPath = "AI.lua";
 bool paused = false;
 
@@ -28,6 +31,10 @@ int main()
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dofile(L,AIPath.c_str());
+
+	playerState = luaL_newstate();
+	luaL_openlibs(playerState);
+	luaL_dofile(playerState,"Player.lua");
 
 	//Create the window
 	sf::ContextSettings settings;
@@ -89,9 +96,9 @@ void update()
 	float dt = deltaTime.restart().asSeconds();
 	if (!paused)
 	{
-		reloadLua("Player.lua");
-		player->update(L, dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
-		reloadLua("AI.lua");
+		//reloadLua("Player.lua");
+		player->update(playerState, dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
+		//reloadLua("AI.lua");
 		mapTile.update(L, dt, player);
 	}
 }
@@ -102,11 +109,9 @@ void reloadLua()
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dofile(L, AIPath.c_str());
-}
-void reloadLua(std::string path)
-{
-	lua_close(L);
-	L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_dofile(L, path.c_str());
+
+	lua_close(playerState);
+	playerState = luaL_newstate();
+	luaL_openlibs(playerState);
+	luaL_dofile(playerState, "Player.lua");
 }

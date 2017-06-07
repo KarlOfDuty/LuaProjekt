@@ -1,24 +1,48 @@
-function update(attacking,dt)
-    if not attacking then
-        meleeAttack = false;
-        rangedAttack = false;
-        movementVector = {x=0, y=0};
-        movementVector["x"], movementVector["y"], meleeAttack, rangedAttack = getInput();
-        if movementVector["x"] ~= 0 or movementVector["y"] ~= 0 then
-            normalize(movementVector);
-            movementVector["x"] = movementVector["x"]*500*dt;
-            movementVector["y"] = movementVector["y"]*500*dt;
+lastmoveVector = {x=1, y=0};
+meleeAttack = false;
+meleeRotation = 0;
+rangedAttack = false;
+timeSinceLastShot = 0;
+
+function update(dt)
+    timeSinceLastShot = timeSinceLastShot + dt;
+    if not meleeAttack then
+        directionVector = {x=0, y=0};
+        directionVector["x"], directionVector["y"], meleeAttack, rangedAttack = getInput();
+        if directionVector["x"] ~= 0 or directionVector["y"] ~= 0 then
+            normalize(directionVector);
+            lastmoveVector["x"] = directionVector["x"];
+            lastmoveVector["y"] = directionVector["y"];
+            movementVector = {x=0, y=0};
+            movementVector["x"] = directionVector["x"]*500*dt;
+            movementVector["y"] = directionVector["y"]*500*dt;
             playerMove(movementVector["y"],movementVector["x"]);
         end
         if meleeAttack then
-            print("space")
+            useMeleeAttack(lastmoveVector["x"],lastmoveVector["y"]);
+            meleeAttack = true;
+            meleeRotation = 0;
         end
-        if rangedAttack then
-            print("ctrl")
+        if rangedAttack  and timeSinceLastShot > 0.5 then
+            xVelocity = lastmoveVector["x"]*1000;
+            yVelocity = lastmoveVector["y"]*1000;
+            shoot(xVelocity, yVelocity, 20);
+            timeSinceLastShot = 0;
         end
     else
-
+        meleeRotation = meleeRotation + 666*dt;
+        rotateMelee(666*dt);
+        meleeCollision();
+        if meleeRotation > 180 then
+            meleeAttack = false;
+            resetMeleeCooldowns();
+        end
     end
+    mtv = {x=0,y=0};
+    mtv["x"],mtv["y"] = playerCollision();
+    playerMove(mtv["y"],mtv["x"]);
+    projectilesCollision(dt);
+    return meleeAttack;
 end
 
 function movement(dir,dt)
