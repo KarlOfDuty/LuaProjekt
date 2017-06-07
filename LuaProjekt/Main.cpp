@@ -22,6 +22,7 @@ bool paused = false;
 
 void update();
 void reloadLua();
+void reloadLua(std::string path);
 int main()
 {
 	L = luaL_newstate();
@@ -88,7 +89,9 @@ void update()
 	float dt = deltaTime.restart().asSeconds();
 	if (!paused)
 	{
+		reloadLua("Player.lua");
 		player->update(L, dt, mapTile.getAllEnemies(), mapTile.allStaticObjects);
+		reloadLua("AI.lua");
 		mapTile.update(L, dt, player);
 	}
 }
@@ -99,4 +102,11 @@ void reloadLua()
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dofile(L, AIPath.c_str());
+}
+void reloadLua(std::string path)
+{
+	lua_close(L);
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_dofile(L, path.c_str());
 }

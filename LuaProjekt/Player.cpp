@@ -120,8 +120,56 @@ void Player::setPos(sf::Vector2f newPos)
 {
 	this->playerShape.setPosition(newPos);
 }
+
+int Player::getInput(lua_State * L)
+{
+	sf::Vector2f directionVector(0,0);
+	bool meleeAttack = false;
+	bool rangedAttack = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+	{
+		directionVector += sf::Vector2f(-1,0);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+	{
+		directionVector += sf::Vector2f(1,0);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	{
+		directionVector += sf::Vector2f(0,-1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	{
+		directionVector += sf::Vector2f(0,1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+	{
+		meleeAttack = true;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+	{
+		rangedAttack = true;
+	}
+	lua_pushnumber(L, directionVector.x);
+	lua_pushnumber(L, directionVector.y);
+	lua_pushboolean(L, meleeAttack);
+	lua_pushboolean(L, rangedAttack);
+	return 4;
+}
+
 void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
 {
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::getInput, 1);
+	lua_setglobal(L, "getInput");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::movementWrapper, 1);
+	lua_setglobal(L, "playerMove");
+	lua_getglobal(L, "update");
+	lua_pushboolean(L, attacking);
+	lua_pushnumber(L, dt);
+	lua_call(L, 2, 0);
+
 	healthText.setString(std::to_string(hp));
 	//Prevent moving and using other attacks while attacking
 	if (!attacking)
@@ -134,6 +182,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			}
 			stoppedAttacking = false;
 		}
+
 		sf::Vector2i movementVector;
 		//Controls
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
@@ -158,7 +207,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
-			shoot(L,dt);
+			//shoot(L,dt);
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
@@ -173,13 +222,14 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			}
 			attackBoxRotation = 0;
 		}
+		/*
 		if (movementVector != sf::Vector2i(0, 0))
 		{
 			lua_pushlightuserdata(L, this);
 			lua_pushcclosure(L, Player::movementWrapper, 1);
 			lua_setglobal(L, "playerMove");
 			//Movement
-			lua_getglobal(L, "playerMovement");
+			lua_getglobal(L, "movement");
 
 			//Movement vector
 			lua_newtable(L);
@@ -194,6 +244,7 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 
 			lua_call(L, 2, 2);
 		}
+		*/
 
 
 	}

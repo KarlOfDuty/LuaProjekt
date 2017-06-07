@@ -31,6 +31,7 @@ private:
 	sf::Font healthFont;
 	sf::Text healthText;
 	static int movementWrapper(lua_State* L);
+	static int getInput(lua_State* L);
 public:
 	Player();
 	~Player();
