@@ -18,7 +18,7 @@ private:
 	sf::CircleShape playerShape;
 	sf::RectangleShape attackBox;
 	float attackBoxRotation;
-	sf::Vector2f direction;
+	sf::Vector2i direction;
 	bool attacking;
 	int hp;
 	bool stoppedAttacking;
@@ -30,6 +30,7 @@ private:
 
 	sf::Font healthFont;
 	sf::Text healthText;
+	static int movementWrapper(lua_State* L);
 public:
 	Player();
 	~Player();
@@ -38,6 +39,7 @@ public:
 	void applyDamage(int damage);
 	void shoot(lua_State* L, float dt);
 	void setPos(sf::Vector2f newPos);
+	void move(float x, float y);
 	void update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };

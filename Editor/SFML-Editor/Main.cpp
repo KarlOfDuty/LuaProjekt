@@ -427,22 +427,6 @@ void setupMenu()
 	menuButtonSubtract = menuButtonAdd;
 	menuButtonSubtract.setTexture(minusTexture);
 
-	/*editButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	editButtonAdd.setOrigin(20, 20);
-	editButtonAdd.setTexture(plusTexture);
-	editButtonAdd.setOutlineColor(sf::Color::Black);
-	editButtonAdd.setOutlineThickness(2);
-	editButtonSubtract = editButtonAdd;
-	editButtonSubtract.setTexture(minusTexture);
-
-	enemyButtonAdd = sf::RectangleShape(sf::Vector2f(40, 40));
-	enemyButtonAdd.setOrigin(20, 20);
-	enemyButtonAdd.setTexture(plusTexture);
-	enemyButtonAdd.setOutlineColor(sf::Color::Black);
-	enemyButtonAdd.setOutlineThickness(2);
-	enemyButtonSubtract = editButtonAdd;
-	enemyButtonSubtract.setTexture(minusTexture);*/
-
 	mapNameAdd = sf::RectangleShape(sf::Vector2f(40, 40));
 	mapNameAdd.setOrigin(20, 20);
 	mapNameAdd.setTexture(plusTexture);
