@@ -76,9 +76,9 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	{
 		lua_pushlightuserdata(L, this);
 		lua_pushcclosure(L, Enemy::movementWrapper, 1);
-		lua_setglobal(L, "enemyMove");
+		lua_setglobal(L, "moveEnemy");
 		//Movement
-		lua_getglobal(L, "enemyMovement");
+		lua_getglobal(L, "move");
 
 		//This pos
 		lua_newtable(L);
