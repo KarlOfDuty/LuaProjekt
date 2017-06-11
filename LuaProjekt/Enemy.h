@@ -30,10 +30,13 @@ private:
 	std::vector<Projectile> allProjectiles;
 	Player* player;
 
-	static int movementWrapper(lua_State* L);
+	static int moveWrapper(lua_State* L);
+	static int getPosLua(lua_State* L);
+	static int getPlayerPosLua(lua_State* L);
+	static int getTimeSinceLastShotLua(lua_State* L);
+	static int getCornersLua(lua_State* L);
 	static int worldCollisionWrapper(lua_State* L);
 	static int projectileCollisionWrapper(lua_State* L);
-
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
 	Enemy(int nr, sf::Vector2f pos);
