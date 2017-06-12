@@ -33,10 +33,12 @@ private:
 	static int moveWrapper(lua_State* L);
 	static int getPosLua(lua_State* L);
 	static int getPlayerPosLua(lua_State* L);
-	static int getTimeSinceLastShotLua(lua_State* L);
 	static int getCornersLua(lua_State* L);
+	static int getTimeSinceLastShotLua(lua_State* L);
+	static int damagePlayerWrapper(lua_State* L);
 	static int worldCollisionWrapper(lua_State* L);
 	static int projectileCollisionWrapper(lua_State* L);
+	static int createProjectileWrapper(lua_State* L);
 public:
 	Enemy(int radius, int amountOfCorners, int health, int damage, sf::Color color, sf::Vector2f pos);
 	Enemy(int nr, sf::Vector2f pos);
@@ -46,10 +48,11 @@ public:
 	bool canTakeMeleeDamage();
 	void setMeleeCooldown(bool canTakeDmg);
 	void applyDamage(int damageTaken);
-	void rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player);
+	void damagePlayer(int damage);
+	void createProjectile(sf::Vector2f velocity, int size);
 	void update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies);
 	void worldCollision();
-	void projectilesCollision();
+	int projectilesCollision();
 	void move(float x, float y);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states)const;
 };
