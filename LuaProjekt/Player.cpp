@@ -37,7 +37,6 @@ void Player::move(float x, float y)
 
 	playerShape.setPosition(playerShape.getPosition() + dir);
 }
-
 int Player::movementWrapper(lua_State * L)
 {
 	Player* c = static_cast<Player*>(
@@ -72,160 +71,136 @@ void Player::applyDamage(int damage)
 		invincibilityClock.restart();
 	}
 }
-void Player::shoot(lua_State* L, float dt)
+int Player::shootWrapper(lua_State* L)
 {
-	//Ranged attack
-	lua_getglobal(L, "shoot");
-
-	//Shot direction
-	lua_newtable(L);
-	lua_pushstring(L, "x");
-	lua_pushnumber(L, direction.x);
-	lua_settable(L, -3);
-	lua_pushstring(L, "y");
-	lua_pushnumber(L, direction.y);
-	lua_settable(L, -3);
-
-	//Shot delay
-	lua_pushnumber(L, shootDelay.getElapsedTime().asSeconds());
-
-	lua_call(L, 2, 5);
-
-	bool shoot = true;
-	shoot = (int)lua_tointeger(L, -1);
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	int size = (int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
-	if (shoot)
-	{
-		sf::Vector2f velocity;
-		velocity.x = (float)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-		velocity.y = (float)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-
-		int damage = 0;
-		damage = (int)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-
-		int size = 0;
-		size = (int)lua_tonumber(L, -1);
-		lua_pop(L, 1);
-
-		projectileDamage = damage;
-		allProjectiles.push_back(Projectile(playerShape.getPosition(), velocity*dt, size));
-		shootDelay.restart();
-	}
-
+	sf::Vector2f velocity;
+	velocity.y = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	velocity.x = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	c->shoot(velocity, size);
+	return 0;
+}
+void Player::shoot(sf::Vector2f velocity, int size)
+{
+	allProjectiles.push_back(Projectile(playerShape.getPosition(), velocity, size));
 }
 void Player::setPos(sf::Vector2f newPos)
 {
 	this->playerShape.setPosition(newPos);
 }
-void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
+int Player::getInput(lua_State * L)
 {
-	healthText.setString(std::to_string(hp));
-	//Prevent moving and using other attacks while attacking
-	if (!attacking)
+	sf::Vector2f directionVector(0,0);
+	bool meleeAttack = false;
+	bool rangedAttack = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
-		if (stoppedAttacking)
-		{
-			for (int i = 0; i < allEnemies.size(); i++)
-			{
-				allEnemies[i]->setMeleeCooldown(false);
-			}
-			stoppedAttacking = false;
-		}
-		sf::Vector2i movementVector;
-		//Controls
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-		{
-			direction = sf::Vector2i(-1, 0);
-			movementVector = movementVector + direction;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		{
-			direction = sf::Vector2i(1, 0);
-			movementVector = movementVector + direction;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-		{
-			direction = sf::Vector2i(0, -1);
-			movementVector = movementVector + direction;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-		{
-			direction = sf::Vector2i(0, 1);
-			movementVector = movementVector + direction;
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-		{
-			shoot(L,dt);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-		{
-			attacking = true;
-			if (direction.x != 1)
-			{
-				attackBox.setRotation(270 * direction.y);
-			}
-			else
-			{
-				attackBox.setRotation(180);
-			}
-			attackBoxRotation = 0;
-		}
-		if (movementVector != sf::Vector2i(0, 0))
-		{
-			lua_pushlightuserdata(L, this);
-			lua_pushcclosure(L, Player::movementWrapper, 1);
-			lua_setglobal(L, "playerMove");
-			//Movement
-			lua_getglobal(L, "playerMovement");
-
-			//Movement vector
-			lua_newtable(L);
-			lua_pushstring(L, "x");
-			lua_pushnumber(L, movementVector.x);
-			lua_settable(L, -3);
-			lua_pushstring(L, "y");
-			lua_pushnumber(L, movementVector.y);
-			lua_settable(L, -3);
-
-			lua_pushnumber(L, dt);
-
-			lua_call(L, 2, 2);
-		}
-
-
+		directionVector += sf::Vector2f(-1,0);
 	}
-	else
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 	{
-		//Rotation
-		attackBox.rotate(666 * dt);
-		attackBoxRotation += 666 * dt;
-		if (attackBoxRotation > 180)
+		directionVector += sf::Vector2f(1,0);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+	{
+		directionVector += sf::Vector2f(0,-1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+	{
+		directionVector += sf::Vector2f(0,1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+	{
+		meleeAttack = true;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+	{
+		rangedAttack = true;
+	}
+	lua_pushnumber(L, directionVector.x);
+	lua_pushnumber(L, directionVector.y);
+	lua_pushboolean(L, meleeAttack);
+	lua_pushboolean(L, rangedAttack);
+	return 4;
+}
+int Player::useMeleeAttackWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	sf::Vector2f direction;
+	direction.y = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	direction.x = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	c->useMeleeAttack(direction);
+	return 0;
+}
+void Player::useMeleeAttack(sf::Vector2f direction)
+{
+	attacking = true;
+	attackBoxRotation = 0;
+	attackBox.setPosition(playerShape.getPosition().x + direction.x*30, playerShape.getPosition().y+direction.y*30);
+	attackBox.setRotation(atan2(-direction.y, -direction.x)/3.14*180);
+}
+int Player::rotateMeleeWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	float angle = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	c->rotateMelee(angle);
+	return 0;
+}
+void Player::rotateMelee(float angle)
+{
+	attackBox.rotate(angle);
+}
+int Player::resetMeleeCooldownsWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	c->resetMeleeCooldowns();
+	return 0;
+}
+void Player::resetMeleeCooldowns()
+{
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		allEnemies[i]->setMeleeCooldown(false);
+	}
+}
+int Player::meleeCollisionWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	c->meleeCollision();
+	return 0;
+}
+void Player::meleeCollision()
+{
+	for (int i = 0; i < allEnemies.size(); i++)
+	{
+		sf::Vector2f mtv;
+		if (allEnemies[i]->canTakeMeleeDamage())
 		{
-			attacking = false;
-		}
-
-		//Collision between sword and enemy
-		for (int i = 0; i < allEnemies.size(); i++)
-		{
-			sf::Vector2f mtv;
-			if (allEnemies[i]->canTakeMeleeDamage())
+			if (collision::collides(attackBox, allEnemies[i]->getShape(), mtv))
 			{
-				if (collision::collides(attackBox, allEnemies[i]->getShape(), mtv))
-				{
-					allEnemies[i]->applyDamage(10);
-					allEnemies[i]->setMeleeCooldown(true);
-				}
+				allEnemies[i]->applyDamage(10);
+				allEnemies[i]->setMeleeCooldown(true);
 			}
 		}
-		stoppedAttacking = true;
 	}
-
-	//Update Attackbox position
-	attackBox.setPosition(playerShape.getPosition() + sf::Vector2f(35 * direction.x, 35 * direction.y));
-	//Player collision with static objects
+}
+int Player::playerCollisionWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	sf::Vector2f totalMTV = c->playerCollision();
+	lua_pushnumber(L, totalMTV.x);
+	lua_pushnumber(L, totalMTV.y);
+	return 2;
+}
+sf::Vector2f Player::playerCollision()
+{
 	std::vector<StaticObject*> closeObjects;
 	for (int i = 0; i < allStaticObjects.size(); i++)
 	{
@@ -236,15 +211,27 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			closeObjects.push_back(allStaticObjects[i]);
 		}
 	}
+	sf::Vector2f totalMTV(0,0);
 	for (int i = 0; i < closeObjects.size(); i++)
 	{
 		sf::Vector2f mtv;
 		if (collision::collides(closeObjects[i]->getShape(), playerShape, mtv))
 		{
-			playerShape.setPosition(playerShape.getPosition() - mtv);
+			totalMTV -= mtv;
 		}
 	}
-
+	return totalMTV;
+}
+int Player::projectilesCollisionWrapper(lua_State* L)
+{
+	Player* c = static_cast<Player*>(lua_touserdata(L, lua_upvalueindex(1)));
+	float dt = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	c->projectilesCollision(dt);
+	return 0;
+}
+void Player::projectilesCollision(float dt)
+{
 	//Collision projectiles
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
@@ -294,6 +281,45 @@ void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std
 			}
 		}
 	}
+}
+void Player::update(lua_State* L, float dt, std::vector<Enemy*> &allEnemies, std::vector<StaticObject*> &allStaticObjects)
+{
+	this->allEnemies = allEnemies;
+	this->allStaticObjects = allStaticObjects;
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::getInput, 1);
+	lua_setglobal(L, "getInput");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::movementWrapper, 1);
+	lua_setglobal(L, "playerMove");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::useMeleeAttackWrapper, 1);
+	lua_setglobal(L, "useMeleeAttack");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::shootWrapper, 1);
+	lua_setglobal(L, "shoot");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::rotateMeleeWrapper, 1);
+	lua_setglobal(L, "rotateMelee");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::resetMeleeCooldownsWrapper, 1);
+	lua_setglobal(L, "resetMeleeCooldowns");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::meleeCollisionWrapper, 1);
+	lua_setglobal(L, "meleeCollision");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::playerCollisionWrapper, 1);
+	lua_setglobal(L, "playerCollision");
+	lua_pushlightuserdata(L, this);
+	lua_pushcclosure(L, Player::projectilesCollisionWrapper, 1);
+	lua_setglobal(L, "projectilesCollision");
+	lua_getglobal(L, "update");
+	lua_pushnumber(L, dt);
+	lua_call(L, 1, 1);
+	attacking = (bool)lua_toboolean(L, -1);
+	lua_pop(L, 1);
+
+	healthText.setString(std::to_string(hp));
 }
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states)const
 {

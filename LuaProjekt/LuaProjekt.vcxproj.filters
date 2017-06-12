@@ -64,7 +64,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AI.lua">
+    <None Include="Player.lua">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Enemy.lua">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

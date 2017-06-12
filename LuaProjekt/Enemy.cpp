@@ -26,7 +26,6 @@ Enemy::Enemy(int nr, sf::Vector2f pos)
 	this->damage = nr;
 	this->alive = true;
 }
-
 Enemy::~Enemy()
 {
 
@@ -55,12 +54,14 @@ void Enemy::applyDamage(int damageTaken)
 		alive = false;
 	}
 }
-void Enemy::rangedAttack(sf::Vector2f velocity, int damage, int size, Player* player)
+void Enemy::damagePlayer(int damage)
 {
-	//Create projectile here
-	this->damage = damage;
+	player->applyDamage(damage);
+}
+void Enemy::createProjectile(sf::Vector2f velocity, int size)
+{	
+	this->timeSinceLastShot = 0;
 	allProjectiles.push_back(Projectile(shape.getPosition(), velocity, size));
-	timeSinceLastShot = 0;
 }
 void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStaticObjects, Player *player, std::vector<Enemy*> enemies)
 {
@@ -70,98 +71,41 @@ void Enemy::update(lua_State* L, float dt, std::vector<StaticObject*> &allStatic
 	{
 		allProjectiles[i].update(dt);
 	}
-
 	timeSinceLastShot += dt;
 	if (alive)
 	{
+		//Set C++ functions in the lua state
 		lua_pushlightuserdata(L, this);
-		lua_pushcclosure(L, Enemy::movementWrapper, 1);
-		lua_setglobal(L, "enemyMove");
-		//Movement
-		lua_getglobal(L, "enemyMovement");
-
-		//This pos
-		lua_newtable(L);
-		lua_pushstring(L, "x");
-		lua_pushnumber(L, shape.getPosition().x);
-		lua_settable(L, -3);
-		lua_pushstring(L, "y");
-		lua_pushnumber(L, shape.getPosition().y);
-		lua_settable(L, -3);
-
-		//Player pos
-		lua_newtable(L);
-		lua_pushstring(L, "x");
-		lua_pushnumber(L, player->getShape().getPosition().x);
-		lua_settable(L, -3);
-		lua_pushstring(L, "y");
-		lua_pushnumber(L, player->getShape().getPosition().y);
-		lua_settable(L, -3);
-
-		lua_pushnumber(L, shape.getPointCount());
-
-		lua_pushnumber(L, dt);
-
-		lua_call(L, 4, 0);
-
-		//Ranged attack
-		lua_getglobal(L, "rangedAttackAI");
-
-		//This pos
-		lua_newtable(L);
-		lua_pushstring(L, "x");
-		lua_pushnumber(L, shape.getPosition().x);
-		lua_settable(L, -3);
-		lua_pushstring(L, "y");
-		lua_pushnumber(L, shape.getPosition().y);
-		lua_settable(L, -3);
-
-		//Player pos
-		lua_newtable(L);
-		lua_pushstring(L, "x");
-		lua_pushnumber(L, player->getShape().getPosition().x);
-		lua_settable(L, -3);
-		lua_pushstring(L, "y");
-		lua_pushnumber(L, player->getShape().getPosition().y);
-		lua_settable(L, -3);
-
-		//Numbers
-		lua_pushnumber(L, timeSinceLastShot);
-		lua_pushnumber(L, shape.getPointCount());
-		lua_call(L, 4, 5);
-
-		bool shoot = true;
-		shoot = (int)lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		if (shoot)
-		{
-			sf::Vector2f velocity;
-			velocity.x = (float)lua_tonumber(L, -1);
-			lua_pop(L, 1);
-			velocity.y = (float)lua_tonumber(L, -1);
-			lua_pop(L, 1);
-
-			int damage = 0;
-			damage = (int)lua_tonumber(L, -1);
-			lua_pop(L, 1);
-
-			int size = 0;
-			size = (int)lua_tonumber(L, -1);
-			lua_pop(L, 1);
-			rangedAttack(velocity*dt, damage, size, player);
-		}
-
+		lua_pushcclosure(L, Enemy::moveWrapper, 1);
+		lua_setglobal(L, "moveEnemy");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::getPosLua, 1);
+		lua_setglobal(L, "getPos");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::getPlayerPosLua, 1);
+		lua_setglobal(L, "getPlayerPos");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::getCornersLua, 1);
+		lua_setglobal(L, "getCorners");
 		lua_pushlightuserdata(L, this);
 		lua_pushcclosure(L, Enemy::worldCollisionWrapper, 1);
 		lua_setglobal(L, "worldCollision");
-		lua_getglobal(L, "collisionWithWorld");
-		lua_call(L, 0, 0);
-
 		lua_pushlightuserdata(L, this);
 		lua_pushcclosure(L, Enemy::projectileCollisionWrapper, 1);
-		lua_setglobal(L, "projectileCollision");
-		lua_getglobal(L, "allProjectilesCollision");
-		lua_call(L, 0, 0);
+		lua_setglobal(L, "projectilesCollision");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::getTimeSinceLastShotLua, 1);
+		lua_setglobal(L, "getTimeSinceLastShot");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::createProjectileWrapper, 1);
+		lua_setglobal(L, "createProjectile");
+		lua_pushlightuserdata(L, this);
+		lua_pushcclosure(L, Enemy::damagePlayerWrapper, 1);
+		lua_setglobal(L, "damagePlayer");
+		//Run lua update function
+		lua_getglobal(L, "update");
+		lua_pushnumber(L, dt);
+		lua_call(L, 1, 0);
 	}
 }
 
@@ -188,13 +132,12 @@ void Enemy::worldCollision()
 		{
 			xMove -= mtv.x;
 			yMove -= mtv.y;
-			//shape.setPosition(shape.getPosition() - mtv);
 		}
 	}
 	shape.setPosition(xMove, yMove);
 }
 
-void Enemy::projectilesCollision()
+int Enemy::projectilesCollision()
 {
 	//Collision projectiles
 	for (int i = 0; i < allProjectiles.size(); i++)
@@ -230,15 +173,18 @@ void Enemy::projectilesCollision()
 			allProjectiles.erase(allProjectiles.begin() + i);
 		}
 	}
+	int hits = 0;
 	//Check if colliding with player
 	for (int i = 0; i < allProjectiles.size(); i++)
 	{
 		if (collision::collides(allProjectiles[i].getShape(), player->getShape()))
 		{
-			player->applyDamage(damage);
+			//player->applyDamage(damage);
 			allProjectiles.erase(allProjectiles.begin() + i);
+			hits++;
 		}
 	}
+	return hits;
 }
 
 void Enemy::move(float x, float y)
@@ -250,7 +196,7 @@ void Enemy::move(float x, float y)
 	shape.setPosition(shape.getPosition() + dir);
 }
 
-int Enemy::movementWrapper(lua_State * L)
+int Enemy::moveWrapper(lua_State * L)
 {
 	Enemy* c = static_cast<Enemy*>(
 		lua_touserdata(L, lua_upvalueindex(1)));
@@ -262,6 +208,57 @@ int Enemy::movementWrapper(lua_State * L)
 	lua_pop(L, 1);
 
 	c->move(dir.x, dir.y);
+	return 0;
+}
+int Enemy::getPosLua(lua_State * L)
+{
+	Enemy* thisEnemy = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+	//This position
+	lua_newtable(L);
+	lua_pushstring(L, "x");
+	lua_pushnumber(L, thisEnemy->shape.getPosition().x);
+	lua_settable(L, -3);
+	lua_pushstring(L, "y");
+	lua_pushnumber(L, thisEnemy->shape.getPosition().y);
+	lua_settable(L, -3);
+	return 1;
+}
+int Enemy::getPlayerPosLua(lua_State * L)
+{
+	Enemy* thisEnemy = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+	//The player's position
+	lua_newtable(L);
+	lua_pushstring(L, "x");
+	lua_pushnumber(L, thisEnemy->player->getShape().getPosition().x);
+	lua_settable(L, -3);
+	lua_pushstring(L, "y");
+	lua_pushnumber(L, thisEnemy->player->getShape().getPosition().y);
+	lua_settable(L, -3);
+	return 1;
+}
+int Enemy::getCornersLua(lua_State * L)
+{
+	Enemy* thisEnemy = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+	lua_pushnumber(L, thisEnemy->shape.getPointCount());
+	return 1;
+}
+int Enemy::getTimeSinceLastShotLua(lua_State * L)
+{
+	Enemy* thisEnemy = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+	lua_pushnumber(L, thisEnemy->timeSinceLastShot);
+	return 1;
+}
+int Enemy::damagePlayerWrapper(lua_State * L)
+{
+	Enemy* thisEnemy = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
+	int damage = (int)lua_tointeger(L, -1);
+	lua_pop(L, 1);
+	thisEnemy->damagePlayer(damage);
 	return 0;
 }
 int Enemy::worldCollisionWrapper(lua_State * L)
@@ -276,10 +273,25 @@ int Enemy::projectileCollisionWrapper(lua_State * L)
 {
 	Enemy* c = static_cast<Enemy*>(
 		lua_touserdata(L, lua_upvalueindex(1)));
+	lua_pushnumber(L, c->projectilesCollision());
+	return 1;
+}
+int Enemy::createProjectileWrapper(lua_State * L)
+{
+	Enemy* c = static_cast<Enemy*>(
+		lua_touserdata(L, lua_upvalueindex(1)));
 
-	int index = (int)lua_tointeger(L, -1);
+	sf::Vector2f velocity;
+	velocity.x = (float)lua_tonumber(L, -1);
 	lua_pop(L, 1);
-	c->projectilesCollision();
+	velocity.y = (float)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	int size = 0;
+	size = (int)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	c->createProjectile(velocity,size);
 	return 0;
 }
 void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const
