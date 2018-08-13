@@ -19,7 +19,9 @@ A map editor for the game.
 ### Controls
 
 A: Create an enemy
+
 S: Create a wall
+
 D: Create a door
 
 Click or hold one of the above keys while moving the mouse over the grid to create objects.
