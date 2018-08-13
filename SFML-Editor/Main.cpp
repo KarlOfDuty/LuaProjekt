@@ -60,7 +60,6 @@ int main()
 		sf::Texture* textureTile = new sf::Texture;
 		textureTile->loadFromImage(tileset, tile);
 		allTextures.push_back(textureTile);
-		
 	}
 
 	//LOADING NEW MAP TILES
@@ -70,7 +69,7 @@ int main()
 			temp.setPosition(x * 80, y * 80);
 			temp.setOutlineColor(sf::Color::Magenta);
 			temp.setTexture(allTextures[1]);
-			allTiles.push_back(new StaticObject(temp,1));
+			allTiles.push_back(new StaticObject(temp, 1));
 		}
 	}
 
@@ -107,7 +106,7 @@ int main()
 				}
 				if (!editingEnemy)
 				{
-					if (clickedButton(sf::Mouse::getPosition(window),menuButtonSubtract))
+					if (clickedButton(sf::Mouse::getPosition(window), menuButtonSubtract))
 					{
 						StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 						if (staticObject != nullptr)
@@ -115,7 +114,7 @@ int main()
 							staticObject->subtractNumber(allTextures);
 						}
 					}
-					if (clickedButton(sf::Mouse::getPosition(window),menuButtonAdd))
+					if (clickedButton(sf::Mouse::getPosition(window), menuButtonAdd))
 					{
 						StaticObject* staticObject = dynamic_cast<StaticObject*>(markedTile);
 						if (staticObject != nullptr)
@@ -186,7 +185,7 @@ int main()
 							}
 						}
 					}
-					
+
 					int pos = -1;
 					editingEnemy = false;
 					for (size_t i = 0; i < allTiles.size(); i++)
@@ -211,11 +210,10 @@ int main()
 						{
 							allEnemies[pos]->addCorner();
 						}
-
 					}
 				}
-				
-				if (clickedButton(sf::Mouse::getPosition(window),mapNameAdd))
+
+				if (clickedButton(sf::Mouse::getPosition(window), mapNameAdd))
 				{
 					outputMapNr++;
 				}
@@ -265,7 +263,7 @@ int main()
 					temp.setPosition(x * 80, y * 80);
 					temp.setOutlineColor(sf::Color::Magenta);
 					temp.setTexture(allTextures[0]);
-					allTiles[y * 16 + x] = new StaticObject(temp,0);
+					allTiles[y * 16 + x] = new StaticObject(temp, 0);
 					delete oldTile;
 				}
 			}
@@ -290,9 +288,9 @@ int main()
 					allTiles[y * 16 + x] = new StaticObject(temp, 1);
 
 					sf::CircleShape shape(10 * 3, 3);
-					shape.setOrigin(shape.getRadius(),shape.getRadius());
+					shape.setOrigin(shape.getRadius(), shape.getRadius());
 					shape.rotate(45);
-					shape.setPosition(x * 80+40, y * 80+40);
+					shape.setPosition(x * 80 + 40, y * 80 + 40);
 					shape.setFillColor(sf::Color::Red);
 					allEnemies[y * 16 + x] = new Enemy(shape, 3);
 					delete oldTile;
@@ -314,7 +312,7 @@ int main()
 					{
 						if (markedTile == allTiles[i])
 						{
-							allTiles[i] = new StaticObject(newTile,1);
+							allTiles[i] = new StaticObject(newTile, 1);
 							position = i;
 						}
 					}
@@ -329,7 +327,6 @@ int main()
 							allEnemies[position] = nullptr;
 						}
 					}
-
 				}
 			}
 		}
@@ -337,7 +334,6 @@ int main()
 		window.clear();
 
 		window.draw(menuBackGround);
-
 
 		for (size_t i = 0; i < allTiles.size(); i++)
 		{
@@ -454,9 +450,9 @@ void menuDrawing(sf::RenderWindow &window)
 			drawTextAt("Tile name:", tileText, 1400, 200, window);
 			if (!editTileName)
 			{
-				drawTextAt(door->getTileName(), tileText, 1400, 250,window);
+				drawTextAt(door->getTileName(), tileText, 1400, 250, window);
 			}
-			else if(editTileName)
+			else if (editTileName)
 			{
 				drawTextAt(door->getTileName(), tileTextRed, 1400, 250, window);
 			}
@@ -469,7 +465,7 @@ void menuDrawing(sf::RenderWindow &window)
 			{
 				drawTextAt(door->getMapName(), tileTextRed, 1400, 350, window);
 			}
-			drawTextAt("Out direction:", tileText, 1400, 400,window);
+			drawTextAt("Out direction:", tileText, 1400, 400, window);
 			if (!editOutDir)
 			{
 				drawTextAt(door->getOutDirection(), tileText, 1400, 450, window);
@@ -516,7 +512,7 @@ void menuDrawing(sf::RenderWindow &window)
 	{
 		drawTextAt("Nothing Marked", tileText, 1400, 30, window);
 	}
-	
+
 	//Save infomation
 	drawTextAt("Map Name", tileText, 1400, 700, window);
 	drawTextAt("map" + std::to_string(outputMapNr), tileText, 1400, 750, window);
@@ -530,11 +526,11 @@ void menuDrawing(sf::RenderWindow &window)
 
 void drawTextAt(std::string text, sf::Text &textObject, int xPos, int yPos, sf::RenderWindow &window)
 {
-		textObject.setString(text);
-		sf::FloatRect textRect = textObject.getLocalBounds();
-		textObject.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-		textObject.setPosition(xPos, yPos);
-		window.draw(textObject);
+	textObject.setString(text);
+	sf::FloatRect textRect = textObject.getLocalBounds();
+	textObject.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+	textObject.setPosition(xPos, yPos);
+	window.draw(textObject);
 }
 
 bool clickedButton(sf::Vector2i mousePos, sf::RectangleShape button)
@@ -551,8 +547,8 @@ void saveMap()
 {
 	//Open file with mapname
 	std::ofstream outFile;
-	outFile.open("map" + std::to_string(outputMapNr) + ".txt");
-	
+	outFile.open("tiles/map" + std::to_string(outputMapNr) + ".txt");
+
 	//Find all out tilenames
 	std::vector<DoorTile*> usedTileNames;
 	for (int i = 0; i < allTiles.size(); i++)
